@@ -27,13 +27,13 @@
 <body>
 
     <!--导航-->
-    <header class="navbar fixed-top navbar-expand-sm bg-dark navbar-dark">
+    <header class="navbar fixed-top navbar-expand-sm navbar-light bg-light" style="background-color: #e3f2fd;">
         <ul class="nav nav-pills">
             <li class="nav-item">
-                <a class="nav-link active" href="javascript:;" onclick="sendMessage('2')">开始程序</a>
+                <a class="nav-link btn-light" href="javascript:;" onclick="sendMessage('2')">开始程序</a>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
                     aria-expanded="false">设置</a>
                 <div class="dropdown-menu">
                     <button class="dropdown-item" data-toggle="modal" data-target="#exampleModalCenter">选择区域地图</button>
@@ -46,18 +46,18 @@
                 </div>
             </li>
             <li class="nav-item">
-                <button type="button" class="btn btn-success" onclick="setTx()">set tx</button>
+                <button type="button" class="btn btn-light" onclick="setTx()">set tx</button>
 
-                <button type="button" class="btn btn-secondary" onclick="setRx()">set rx</button>
+                <button type="button" class="btn btn-light" onclick="setRx()">set rx</button>
 
-                <button type="button" class="btn btn-danger" onclick="reset()">reset</button>
-                <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
+                <button type="button" class="btn btn-light" onclick="reset()">reset</button>
+                <a class="btn btn-light" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
                     aria-controls="collapseExample">
-                    Link with href
+                    Setting
                 </a>
-                <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample01" role="button" aria-expanded="false"
+                <a class="btn btn-light" data-toggle="collapse" href="#collapseExample01" role="button" aria-expanded="false"
                     aria-controls="collapseExample01">
-                    Link with href
+                    Output
                 </a>
 
             </li>
@@ -67,9 +67,7 @@
                 <a class="nav-link disabled" href="#">离开</a>
             </li>
         </ul>
-        <canvas id="locationCanvas" width="200" height="40" style="border:1px solid #c3c3c3;">
-            Your browser does not support the canvas element.
-        </canvas>
+
 
 
     </header>
@@ -141,6 +139,9 @@
                     </div>
                 </div>
             </div>
+            <canvas id="locationCanvas" class="position-absolute" width="200" height="40" style="border:1px solid #c3c3c3;top: 70px;right: 20px;color: white;">
+                Your browser does not support the canvas element.
+            </canvas>
         </div>
 
     </div>
@@ -717,7 +718,6 @@
 
         function load3DS(intersect, type) {
             var loader = new THREE.TDSLoader();
-
             loader.load("./Evo.3ds", function (object) {
                 object.traverse(function (child) {
                     if (child instanceof THREE.Mesh) {
@@ -758,7 +758,7 @@
             renderer = new THREE.WebGLRenderer({
                 antialias: true
             });
-            renderer.setClearColor(new THREE.Color(0x000000)); //设置窗口背景颜色为黑
+            renderer.setClearColor(new THREE.Color(0xffffff)); //设置窗口背景颜色为黑
             renderer.setSize(width, height); //设置窗口尺寸
             //将renderer关联到container，这个过程类似于获取canvas元素
             container.appendChild(renderer.domElement);
@@ -1133,6 +1133,7 @@
             cxt.fillText(latitude, 10, 33);
             //render();
         }
+        //设置TX
         function onDocumentMouseDown(event) {
             event.preventDefault();
             mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
@@ -1157,6 +1158,7 @@
 
         }
 
+        //设置RX
         function onDocumentMouseDown2(event) {
             event.preventDefault();
             mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);

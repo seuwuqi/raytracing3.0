@@ -12,6 +12,13 @@
 #include "filelogger.h"
 #include "requestmapper.h"
 
+#include <QtGui/QGuiApplication>
+#include <QtQml/QQmlApplicationEngine>
+#include <QtWebEngine/qtwebengineglobal.h>
+#include "mesh.h"
+#include "echoserver.h"
+#include "tracer.h"
+
 using namespace stefanfrings;
 
 /** Cache for template files */
@@ -74,7 +81,9 @@ QString searchConfigFile()
 */
 int main(int argc, char *argv[])
 {
-    QCoreApplication app(argc,argv);
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+    QGuiApplication app(argc, argv);
 
     app.setApplicationName("Demo1");
     app.setOrganizationName("Butterfly");
@@ -112,6 +121,17 @@ int main(int argc, char *argv[])
 
     qWarning("Application has started");
 
+
+
+
+    QtWebEngine::initialize();
+
+    QQmlApplicationEngine engine;
+    engine.load(QUrl(QStringLiteral("../Demo1/main.qml")));
+
+    EchoServer *server = new EchoServer(1234, true);
+
+    QObject::connect(server, &EchoServer::closed, &app, &QGuiApplication::quit);
     app.exec();
 
     qWarning("Application has stopped");

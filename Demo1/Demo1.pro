@@ -3,16 +3,29 @@
 
 TARGET = Demo1
 TEMPLATE = app
-QT = core network
+QT = core network quick webengine  websockets
 CONFIG += console
-
 HEADERS += \
            src/requestmapper.h \
            src/controller/dumpcontroller.h \
            src/controller/templatecontroller.h \
            src/controller/formcontroller.h \
            src/controller/fileuploadcontroller.h \
-           src/controller/sessioncontroller.h
+           src/controller/sessioncontroller.h \
+    src/echoserver.h \
+    src/edge.h \
+    src/FileManager.h \
+    src/FilePoint.h \
+    src/mesh.h \
+    src/node.h \
+    src/object.h \
+    src/path.h \
+    src/point.h \
+    src/scene.h \
+    src/tracer.h \
+    src/type.h \
+    src/vehicle.h \
+    src/voxel.h
 
 SOURCES += src/main.cpp \
            src/requestmapper.cpp \
@@ -20,7 +33,9 @@ SOURCES += src/main.cpp \
            src/controller/templatecontroller.cpp \
            src/controller/formcontroller.cpp \
            src/controller/fileuploadcontroller.cpp \
-           src/controller/sessioncontroller.cpp
+           src/controller/sessioncontroller.cpp \
+    src/echoserver.cpp \
+    src/FilePoint.cpp
 
 OTHER_FILES += etc/* etc/docroot/* etc/templates/* etc/ssl/* logs/* ../readme.txt
 
@@ -105,4 +120,9 @@ DISTFILES += \
     etc/docroot/js/bootstrap.bundle.js.map \
     etc/docroot/js/bootstrap.bundle.min.js.map \
     etc/docroot/js/bootstrap.js.map \
-    etc/docroot/js/bootstrap.min.js.map
+    etc/docroot/js/bootstrap.min.js.map \
+    etc/docroot/index.html \
+    main.qml
+
+RESOURCES += \
+    qml.qrc
