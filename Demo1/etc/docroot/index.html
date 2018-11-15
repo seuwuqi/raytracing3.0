@@ -169,17 +169,17 @@
                         <div class="form-group">
                             <div class="custom-file">
                                 <h5><span class="badge badge-secondary">shp文件:</span></h5>
-                                <input type="file" class="form-control-file" id="exampleFormControlFile1">
+                                <input type="file" class="form-control-file" id="file-input">
                                 <hr>
                                 <h5><span class="badge badge-secondary">dbf文件:</span></h5>
-                                <input type="file" class="form-control-file" id="exampleFormControlFile2">
+                                <input type="file" class="form-control-file" id="dbf-file-input">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Open</button>
+                    <button type="button" class="btn btn-primary" onclick="parseFile()" data-dismiss="modal">Open</button>
                 </div>
             </div>
         </div>
@@ -197,7 +197,6 @@
     <script type="text/javascript" src="js/tether.min.js"></script>
     <script src="js/controls/DragControls.js"></script>
     <script src="js/controls/TrackballControls.js"></script>
-
 
 
 
@@ -226,7 +225,7 @@
 
         var wsUri = "ws://localhost:1234";
         var websocket = null;
-        initWebSocket();
+        // initWebSocket();
 
         function initWebSocket() {
             try {
@@ -498,6 +497,36 @@
         loadPathLoss([1, 2, 3, 4, 5, 6], [-100, -101, -102, -103, -99, -98]);
 
 
+        function drowSenario(senario) {
+
+            var xmin = senario.bbox[0];
+            var ymin = senario.bbox[1];
+            var xmax = senario.bbox[2];
+            var ymax = senario.bbox[3];
+            var pointX = [];
+            var pointY = [];
+            var pointZ = [];
+            for (var i = 0; i < senario.features.length; i++){
+                var pointXX = [];
+                var pointYY = [];
+                var coords = senario.features[i].coordinates;
+                for (var j = 0; j < coords.length; j ++) {
+                    var x = coords[j][0];
+                    var y = coords[j][1];
+                    pointXX.push(  (x - (xmax + xmin)/ 2)/(xmax - xmin) * 80 );
+                    pointYY.push(  (y - (ymax + ymin)/ 2)/(xmax - xmin) * 80 );
+                }
+                pointX.push(pointXX);
+                pointY.push(pointYY);
+                pointZ.push(  (senario.features[i].z) / 80 *  (118.813658- 118.728997)/( xmax - xmin));
+
+            }
+            for (var i = 0; i < pointX.length; i++) {
+                addMulGeometry(pointX[i], pointY[i], pointZ[i]);
+            }
+
+
+        }
         function setTx() {
 
 
@@ -1207,6 +1236,85 @@
 
     </script>
 
+
+    <!--read-file-->
+    <script src="https://unpkg.com/shapefile@0.6"></script>
+    <script>
+
+
+        var fileInput = document.getElementById('file-input');
+        var fileInput2 = document.getElementById('dbf-file-input');
+
+        var shpBuffer;
+        var dbfBuffer;
+
+        var features = [];
+        var senario = {};
+
+
+        // 监听change事件:
+        fileInput.addEventListener('change', function () {
+
+
+            var file = fileInput.files[0];
+
+            if (!(file.name.endsWith('.shp') )) {
+                alert('Can only upload shp file.');
+                return false;
+            }
+            // 读取文件:
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                  shpBuffer = e.target.result;
+
+            };
+            reader.readAsArrayBuffer(file);
+
+        });
+
+
+        fileInput2.addEventListener('change', function () {
+            var file = fileInput2.files[0];
+
+
+            if (!(file.name.endsWith('.dbf') )) {
+                alert('Can only upload dbf file.');
+                return false;
+            }
+            // 读取文件:
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                dbfBuffer = e.target.result;
+            };
+            reader.readAsArrayBuffer(file);
+
+        });
+
+        function parseFile() {
+            shapefile.open(shpBuffer,dbfBuffer)
+                .then(source => source.read()
+                    .then(function log(result) {
+                        if (result.done) return;
+                        var feature = {
+                            coordinates : result.value.geometry.coordinates[0],
+                            z : result.value.properties.Z
+                        }
+                        features.push(feature);
+                        return source.read().then(log);
+
+                    }).then(function () {
+                        senario = {
+                            features : features,
+                            bbox : source.bbox
+                        }
+                    }).then(function () {
+                        drowSenario(senario);
+                    }))
+                .catch(error => console.error(error.stack));
+        }
+
+
+    </script>
 </body>
 
 </html>
