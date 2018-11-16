@@ -225,7 +225,7 @@
 
         var wsUri = "ws://localhost:1234";
         var websocket = null;
-        // initWebSocket();
+        initWebSocket();
 
         function initWebSocket() {
             try {
@@ -235,7 +235,7 @@
                     websocket.close();
                 websocket = new WebSocket(wsUri);
                 websocket.onopen = function (evt) {
-                    sendMessage("1");
+                    // sendMessage("1");
                     debug("CONNECTED");
                 };
                 websocket.onclose = function (evt) {
@@ -488,7 +488,7 @@
         var objects = [];
 
         var tx = [], rx = [];
-        var xmax, xmin, ymax,ymin;
+        var xmax, xmin, ymax, ymin;
 
         var TxDTO;
         var RxDTO;
@@ -497,7 +497,7 @@
         loadPathLoss([1, 2, 3, 4, 5, 6], [-100, -101, -102, -103, -99, -98]);
 
 
-        function drowSenario(senario) {
+        function drawSenario(senario) {
 
             var xmin = senario.bbox[0];
             var ymin = senario.bbox[1];
@@ -515,6 +515,8 @@
                     var y = coords[j][1];
                     pointXX.push(  (x - (xmax + xmin)/ 2)/(xmax - xmin) * 80 );
                     pointYY.push(  (y - (ymax + ymin)/ 2)/(xmax - xmin) * 80 );
+                    // pointXX.push(  (x - xmin)/(xmax - xmin) * 80 );
+                    // pointYY.push(  (y - ymin)/(xmax - xmin) * 80 );
                 }
                 pointX.push(pointXX);
                 pointY.push(pointYY);
@@ -612,12 +614,33 @@
 
         }
         function drawPath(result) {
-            var obj = JSON.parse(result);
-            console.log(obj[0][0].x);
-            console.log(obj[0][0].y);
+            var paths = JSON.parse(result);
+            console.log(paths[0][0].x);
+            console.log(paths[0][0].y);
 
-            for (var p in obj) {
-                var list = obj[p];
+            for (var p in paths) {
+                var path = paths[p];
+                var geometry = new THREE.Geometry();
+                var material = new THREE.LineBasicMaterial({ vertexColors: true });
+                var color1 = new THREE.Color(0x444444), color2 = new THREE.Color(0xFF0000);
+                for (let i = 0; i < path.length; i++) {
+                    path[i].x = (path[i].x - (xmax + xmin) / 2)/(xmax - xmin) *80;
+                    path[i].y = (path[i].y - (ymax + ymin)/ 2)/(xmax - xmin) * 80;
+                }
+                for (var i = 0; i < path.length - 1; i++) {
+                    var p1 = new THREE.Vector3(path[i].y, 0.5, path[i].x);
+                    var p2 = new THREE.Vector3(path[i + 1].y, 0.5, path[i + 1].x);
+                    geometry.vertices.push(p1);
+                    geometry.vertices.push(p2);
+                    geometry.colors.push(color1, color2);
+                    var line = new THREE.Line(geometry, material, THREE.LineSegments);
+                    scene.add(line);
+                }
+            }
+
+
+            for (var p in paths) {
+                var list = paths[p];
                 var geometry = new THREE.Geometry();
                 var material = new THREE.LineBasicMaterial({ vertexColors: true });
                 var color1 = new THREE.Color(0x444444), color2 = new THREE.Color(0xFF0000);
@@ -630,8 +653,6 @@
                     var line = new THREE.Line(geometry, material, THREE.LineSegments);
                     scene.add(line);
                 }
-
-
             }
 
 
@@ -1297,7 +1318,7 @@
                         if (result.done) return;
                         var feature = {
                             coordinates : result.value.geometry.coordinates[0],
-                            z : result.value.properties.Z
+                            z : result.value.properties.HEIGHT
                         }
                         features.push(feature);
                         return source.read().then(log);
@@ -1307,8 +1328,16 @@
                             features : features,
                             bbox : source.bbox
                         }
+                        xmin = source.bbox[0];
+                        ymin = source.bbox[1];
+                        xmax = source.bbox[2];
+                        ymax = source.bbox[3];
                     }).then(function () {
-                        drowSenario(senario);
+                        drawSenario(senario);
+                    }).then(function () {
+                        senario.type = "senario";
+                        var str = JSON.stringify(senario);
+                        sendMessage(str);
                     }))
                 .catch(error => console.error(error.stack));
         }
