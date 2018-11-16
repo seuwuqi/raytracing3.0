@@ -13,6 +13,7 @@
 #include "scene.h"
 #include <QVariant>
 #include "path.h"
+#include <QJsonObject>
 QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
@@ -22,6 +23,7 @@ class EchoServer : public QObject
 public:
     QMap<QString,QVariant> mapMap;
     double xmax, xmin, ymax, ymin;
+    Scene* scene = new Scene();
 // {"0":[{}]}
     explicit EchoServer(quint16 port, bool debug = false, QObject *parent = nullptr);
     ~EchoServer();
@@ -36,11 +38,13 @@ private Q_SLOTS:
     void socketDisconnected();
     void updateBuilding();
     void updateRoad();
+
     QString rayTracing();
 private:
     QWebSocketServer *m_pWebSocketServer;
     QList<QWebSocket *> m_clients;
     bool m_debug;
+    Scene* updateScene(QJsonObject jsonObject);
     Node* receivedTx;
     Node* receivedRx;
 };

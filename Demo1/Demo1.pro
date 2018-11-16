@@ -4,7 +4,6 @@
 TARGET = Demo1
 TEMPLATE = app
 QT = core network quick webengine  websockets
-CONFIG += console
 HEADERS += \
            src/requestmapper.h \
            src/controller/dumpcontroller.h \
@@ -25,7 +24,8 @@ HEADERS += \
     src/tracer.h \
     src/type.h \
     src/vehicle.h \
-    src/voxel.h
+    src/voxel.h \
+    src/tools.h
 
 SOURCES += src/main.cpp \
            src/requestmapper.cpp \

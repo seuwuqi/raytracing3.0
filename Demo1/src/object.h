@@ -11,7 +11,9 @@ public:
 	double z;
 	int index;
 public:
-    Object(){}
+    Object(){
+
+    }
     Object(vector<Point*> pointList, int index) {
 		this->pointList = pointList;
 		this->index = index;

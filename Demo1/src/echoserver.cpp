@@ -7,6 +7,7 @@
 #include "mesh.h"
 #include "echoserver.h"
 #include "tracer.h"
+#include "QJsonArray"
 QT_USE_NAMESPACE
 
 //! [constructor]
@@ -23,7 +24,7 @@ EchoServer::EchoServer(quint16 port, bool debug, QObject *parent) :
                 this, &EchoServer::onNewConnection);
         connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &EchoServer::closed);
     }
-    updateBuilding();
+//    updateBuilding();
 }
 //! [constructor]
 
@@ -41,7 +42,7 @@ void EchoServer::onNewConnection()
     connect(pSocket, &QWebSocket::textMessageReceived, this, &EchoServer::processTextMessage);
     connect(pSocket, &QWebSocket::binaryMessageReceived, this, &EchoServer::processBinaryMessage);
     connect(pSocket, &QWebSocket::disconnected, this, &EchoServer::socketDisconnected);
-
+    qDebug() << "socket connected:";
     m_clients << pSocket;
 }
 //! [onNewConnection]
@@ -51,7 +52,7 @@ void EchoServer::processTextMessage(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (m_debug)
-        qDebug() << "Message received:" << message;
+//        qDebug() << "Message received:" << message;
     if (pClient) {
         if(message == "1"){
             updateBuilding();
@@ -98,15 +99,20 @@ void EchoServer::processTextMessage(QString message)
                    double latitude=  jsonObject["latitude"].toDouble();
                    double x = (longitude - xmin)/(xmax - xmin);
                    double y = (latitude - ymin)/(xmax - xmin);
+                   qDebug() << "x:" << x*30 << "y:" << y*30;
                    receivedTx = new Node(x,y);
                }else if(type == "rx"){
                    double longitude =  jsonObject["longitude"].toDouble();
                    double latitude=  jsonObject["latitude"].toDouble();
                    double x = (longitude - xmin)/(xmax - xmin);
                    double y = (latitude - ymin)/(xmax - xmin);
+                   qDebug() << "x:" << x*30 << "y:" << y*30;
                    receivedRx = new Node(x, y);
-               }else{
-                   qDebug() << "other type..";
+               }else if(type == "senario"){
+
+                    updateScene(jsonObject);
+
+//                    qDebug() << features;
                }
 
 
@@ -118,6 +124,8 @@ void EchoServer::processTextMessage(QString message)
 //! [processTextMessage]
 
 //! [processBinaryMessage]
+//!
+//!
 void EchoServer::processBinaryMessage(QByteArray message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
@@ -143,20 +151,25 @@ void EchoServer::socketDisconnected()
 //! [socketDisconnected]
 
 QString EchoServer::rayTracing(){
-    FilePoint *filePoint = new FilePoint();
-    FileManager *fileManager = new FileManager("E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.shp",
-                                               "E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.dbf");
-    fileManager->readDbfFile(filePoint);
-    fileManager->readShpFile(filePoint);
-    qDebug() <<"xmax:"<<filePoint->Xmax;
-    qDebug() <<"xmin"<<filePoint->Xmin;
-    qDebug() <<"ymax"<<filePoint->Ymax;
-    qDebug() <<"ymin"<<filePoint->Ymin;
-    filePoint->uniformlize(xmax - xmin);
-    Scene* scene = new Scene(filePoint->allPointList, filePoint->index);
+//    FilePoint *filePoint = new FilePoint();
+//    FileManager *fileManager = new FileManager("E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.shp",
+//                                               "E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.dbf");
+//    fileManager->readDbfFile(filePoint);
+//    fileManager->readShpFile(filePoint);
+//    qDebug() <<"xmax:"<<filePoint->Xmax;
+//    qDebug() <<"xmin"<<filePoint->Xmin;
+//    qDebug() <<"ymax"<<filePoint->Ymax;
+//    qDebug() <<"ymin"<<filePoint->Ymin;
+//    filePoint->uniformlize(xmax - xmin);
+//    Scene* scene = new Scene(filePoint->allPointList, filePoint->index);
+    if(scene == nullptr){
+        qDebug() << "scene has not been initialized";
+        return "scene has not been initialized";
+    }
+    qDebug() << "scene size : "<<scene->objList.size();
     Node* rx = new Node(receivedRx->x * 30, receivedRx->y * 30, 0.0, true);
     Mesh* mesh = new Mesh(30, scene, rx);
-    //射线追踪器
+//    射线追踪器
     Tracer*  tracer = new Tracer(mesh);
     //source = new  Node(14.5, 7.5, 16);
     //tracer->traceAll(source);
@@ -182,11 +195,12 @@ QString EchoServer::rayTracing(){
         for(iter = nodes.begin(); iter != nodes.end(); iter++){
             QMap<QString,QVariant> map;
             Node* node = *iter;
-            //将node的坐标映射成前段展示的坐标
-            Point* point = filePoint->resume(node,xmax - xmin,mesh->size,80);
-            map.insert("x", (point->x));
-            map.insert("y", (point->y));
-            map.insert("z", (point->z));
+//            还原成经纬度坐标
+            double x = node->x / mesh->size * (xmax - xmin) + xmin;
+            double y = node->y / mesh->size * (xmax - xmin) + ymin;
+            map.insert("x", x);
+            map.insert("y", y);
+            map.insert("z", (node->z));
             list.append(QVariant(map));
         }
         data.insert(QString::number(i,10),QVariant(list));
@@ -197,7 +211,40 @@ QString EchoServer::rayTracing(){
     return strJson;
 }
 
+Scene* EchoServer::updateScene(QJsonObject jsonObject){
+    QJsonArray features = jsonObject["features"].toArray();
+    QJsonArray bbox = jsonObject["bbox"].toArray();
 
+//    reset
+    scene->bbox[0] = xmin = bbox[0].toDouble();
+    scene->bbox[1] = ymin = bbox[1].toDouble();
+    scene->bbox[2] = xmax = bbox[2].toDouble();
+    scene->bbox[3] = ymax = bbox[3].toDouble();
+    scene->objList.clear();
+    qDebug() << xmin << ymin << xmax << ymax;
+    for(QJsonValue feature : features){
+        Object* obj = new Object();
+        QJsonArray coordinates = feature["coordinates"].toArray();
+        double z = feature["z"].toString().toDouble();
+        obj->z = z;
+        for(QJsonValue coord : coordinates){
+            double x = coord.toArray()[0].toDouble();
+            double y = coord.toArray()[1].toDouble();
+            x = (x - xmin) / (xmax - xmin);
+            y = (y - ymin) / (xmax - xmin);
+//            qDebug() << "x:" << x << "y:" << y << "z:" << z;
+            obj->pointList.push_back(new Point(x, y ,z ));
+
+        }
+
+        obj->setEdgeList(obj->pointList);
+        qDebug() << obj->pointList.size();
+        qDebug() << obj->edgeList.size();
+        scene->objList.push_back(obj);
+    }
+
+    return scene;
+}
 void EchoServer::updateRoad(){
     mapMap.clear();
     FilePoint *filePoint = new FilePoint();

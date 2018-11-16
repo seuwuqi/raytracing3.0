@@ -48,6 +48,7 @@ public:
 
     }
     void setMesh(Scene* scene, Node* rx){
+        qDebug() << scene->objList.size();
         vector<Object*> objArr = scene->objList;
         qDebug()<<"..";
         for (int i = 0; i < objArr.size(); i++){//遍历所有的建筑

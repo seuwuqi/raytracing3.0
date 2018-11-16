@@ -15,6 +15,7 @@ class Scene
 {
 
 public:
+    int bbox[4];
     vector<Object*> objList;
 public:
     Scene() {
@@ -36,6 +37,11 @@ public:
             objList.push_back(obj);
             startPosi = endPosi;
         }
+    }
+
+    Scene(vector<Object*> objects){
+
+
     }
     ~Scene() {}
 };
