@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+
+<head>
+        <script src="js/jquery.min.js"></script>
+    <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+    <script src="js/bootstrap.min.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        .my_output_bottom_left {
+            background-color: #c3c3c3;
+            bottom: 0px;
+        }
+    </style>
+    <link rel="stylesheet" href="css/bootstrap-submenu.css">
+    <script src="js/bootstrap-submenu.js" defer></script>
+    <style>
+        /* blue: #006699
+       grey: #777
+    */
+    
+    .pen, .pen a{ font-family: 'Open Sans', sans-serif; color: #006699; font-style:normal; }
+    .pen a{ text-decoration: none; }
+    .pen a:hover{ text-decoration: none; color: #333; }
+    .pen .copyright{ font-size: 11px; color: #006699; }
+    .pen .comment{ color: #777; }
+    
+    .pen .page-header { 
+      border-bottom: 1px solid #006699;
+      margin-top: 16px;
+      margin-bottom: 12px; 
+      padding: 12px 0;
+    }
+    .pen .page-header p.lead{ font-size: 18px; }
+    .pen .page-header h1{ margin-top:0; }
+    .pen .page-header h5{ font-style:italic; margin:0; }
+    
+    .pen .page-header .technology{ display: inline; list-style: none; padding:0; }
+    .pen .page-header .technology li{ display: inline; color:#777; margin: 0 12px 12px 0; }
+    .pen .page-header .technology li a{ color:#777; text-decoration: none; }
+    .pen .page-header .technology li a:hover{ color:#333; }
+    
+    .pen .page-footer{ min-height:16px; border-top:1px solid #006699; margin:42px 0 0; padding:12px 0;  }
+    .pen .page-separator{ min-height:3px; border-top:1px solid #ddd; margin:14px 0 24px; padding:0;  }
+    
+    
+    hr.pen{ border-top-color: #c9dbe6; margin:6px 0; }
+    hr.pen-alt{ border-top-color: #006699; margin:6px 0; }
+    hr.pen-tall{ border-top-color: #c9dbe6; margin:24px 0; }
+    
+    .pen-alert{
+      color: #006699;
+      background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjU3QTRBQUI2OTA1MTFFNDkwOTFENUQyMzA3MTQzODMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjU3QTRBQUM2OTA1MTFFNDkwOTFENUQyMzA3MTQzODMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2NTdBNEFBOTY5MDUxMUU0OTA5MUQ1RDIzMDcxNDM4MyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2NTdBNEFBQTY5MDUxMUU0OTA5MUQ1RDIzMDcxNDM4MyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PvhzG8UAAAAySURBVHjaYjz86FMaAwLMspHlBTOYGHAAFnSBI48/wyVmIYnDjWUCmQkzFxngtAMgwACAtAhzrNNqnQAAAABJRU5ErkJggg==);
+    }
+    
+    .pen-bkg{ 
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjU3QTRBQUI2OTA1MTFFNDkwOTFENUQyMzA3MTQzODMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjU3QTRBQUM2OTA1MTFFNDkwOTFENUQyMzA3MTQzODMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2NTdBNEFBOTY5MDUxMUU0OTA5MUQ1RDIzMDcxNDM4MyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2NTdBNEFBQTY5MDUxMUU0OTA5MUQ1RDIzMDcxNDM4MyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PvhzG8UAAAAySURBVHjaYjz86FMaAwLMspHlBTOYGHAAFnSBI48/wyVmIYnDjWUCmQkzFxngtAMgwACAtAhzrNNqnQAAAABJRU5ErkJggg==);
+      padding: 3px;
+    }
+    
+    .pen-box{ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjU3QTRBQUI2OTA1MTFFNDkwOTFENUQyMzA3MTQzODMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjU3QTRBQUM2OTA1MTFFNDkwOTFENUQyMzA3MTQzODMiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo2NTdBNEFBOTY5MDUxMUU0OTA5MUQ1RDIzMDcxNDM4MyIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo2NTdBNEFBQTY5MDUxMUU0OTA5MUQ1RDIzMDcxNDM4MyIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PvhzG8UAAAAySURBVHjaYjz86FMaAwLMspHlBTOYGHAAFnSBI48/wyVmIYnDjWUCmQkzFxngtAMgwACAtAhzrNNqnQAAAABJRU5ErkJggg==);
+      border:1px solid #c9dbe6;
+      margin: 0 0 24px;
+      padding: 6px;
+    }
+    .pen-box-minimum{ 
+      background: #fff;
+      border:1px solid #c9dbe6;
+      margin: 0 0 24px;
+      padding: 6px;
+    }
+    
+    .pen-box .pen-box,
+    .pen-box-minimum .pen-box{ margin: 0; }
+    .pen-box p:last-child{ margin-bottom: 0; }
+    .pen-bkg h3, .pen-bkg h4{ margin-top: 0; }
+    
+    /*
+    @media (min-width: 576px) { 
+    }
+    @media (min-width: 768px) { 
+    }
+    @media (min-width: 992px) { 
+    }
+    @media (min-width: 1200px) { 
+    }
+    */
+    
+    </style>
+    <style class="cp-pen-styles">.dropdown-submenu{ position: relative; }
+    .dropdown-submenu>.dropdown-menu{
+      top:0;
+      left:100%;
+      margin-top:-6px;
+      margin-left:-1px;
+      -webkit-border-radius:0 6px 6px 6px;
+      -moz-border-radius:0 6px 6px 6px;
+      border-radius:0 6px 6px 6px;
+    }
+    .dropdown-submenu>a:after{
+      display:block;
+      content:" ";
+      float:right;
+      width:0;
+      height:0;
+      border-color:transparent;
+      border-style:solid;
+      border-width:5px 0 5px 5px;
+      border-left-color:#cccccc;
+      margin-top:5px;margin-right:-10px;
+    }
+    .dropdown-submenu:hover>a:after{
+      border-left-color:#555;
+    }
+    .dropdown-submenu.pull-left{ float: none; }
+    .dropdown-submenu.pull-left>.dropdown-menu{
+      left: -100%;
+      margin-left: 10px;
+      -webkit-border-radius: 6px 0 6px 6px;
+      -moz-border-radius: 6px 0 6px 6px;
+      border-radius: 6px 0 6px 6px;
+    }
+    
+    /*
+    @media (min-width: 768px) { 
+    }
+    @media (min-width: 992px) { 
+    }
+    @media (min-width: 1200px) { 
+    }
+    */</style>
+</head>
+
+<body>
+    <div class="container pen">
+        <div class="row">
+
+            <div class="col-sm-12 pen">
+                <div class="page-header">
+                    <h5>Bootstrap3 Framework</h5>
+                    <h1>Navbar with submenus</h1>
+                    <ul class="technology">
+                        <li>Bootstrap <span class="label label-default">3.3.7</span></li>
+                        <li>JQuery <span class="label label-default">3.1.0</span></li>
+                        <li>
+                            <a href="https://getbootstrap.com/components/#navbar"><span class="glyphicon glyphicon-book"></span>
+                                Navbar Documentation</a></li>
+                        <li>
+                            <a href="http://www.bootply.com/nZaxpxfiXz"><span class="glyphicon glyphicon-book"></span>
+                                Bootply Documentation</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pen">
+        <div class="row">
+            <div class="col-sm-12">
+
+                <nav class="navbar navbar-default" role="navigation">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                            target="_blank">Brand</a>
+                    </div>
+
+                    <div class="collapse navbar-collapse" id="navbar-collapse-1">
+                        <ul class="nav navbar-nav">
+                            <li class="active"><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Active
+                                    Link</a></li>
+                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Link</a></li>
+                            <li class="dropdown">
+                                <a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                    class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Dropdown <b
+                                        class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                            1</a></li>
+                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                            2</a></li>
+                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                            3</a></li>
+                                    <li class="divider"></li>
+                                    <li class="dropdown dropdown-submenu"><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                            class="dropdown-toggle" data-toggle="dropdown">Dropdown 4</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu 4.1</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu 4.2</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu 4.3</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu 4.4</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="dropdown dropdown-submenu">
+                                        <a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                            class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Dropdown
+                                            5</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu 5.1</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu 5.2</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu 5.3</a></li>
+                                            <li class="divider"></li>
+                                            <li class="dropdown dropdown-submenu"><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                                    class="dropdown-toggle" data-toggle="dropdown">Dropdown Submenu 5.4</a>
+                                                <ul class="dropdown-menu">
+                                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                            Submenu 5.4.1</a></li>
+                                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                            Submenu 5.4.2</a></li>
+                                                    <li class="divider"></li>
+                                                    <li class="dropdown dropdown-submenu"><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                                            class="dropdown-toggle" data-toggle="dropdown">Dropdown
+                                                            Submenu 5.4.3</a>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu 5.4.3.1</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu 5.4.3.2</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu 5.4.3.3</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu 5.4.3.4</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="dropdown dropdown-submenu"><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                                            class="dropdown-toggle" data-toggle="dropdown">Dropdown
+                                                            Submenu 5.4.4</a>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu 5.4.4.1</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu 5.4.4.2</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu 5.4.4.3</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu 5.4.4.4</a></li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                    class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Dropdown <b
+                                        class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                            Link 1</a></li>
+                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                            Link 2</a></li>
+                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                            Link 3</a></li>
+                                    <li class="dropdown dropdown-submenu">
+                                        <a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                            class="dropdown-toggle" data-toggle="dropdown">Dropdown Link 4</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu Link 4.1</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu Link 4.2</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu Link 4.3</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu Link 4.4</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="dropdown dropdown-submenu">
+                                        <a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                            class="dropdown-toggle" data-toggle="dropdown">Dropdown Link 5</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu Link 5.1</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu Link 5.2</a></li>
+                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                    Submenu Link 5.3</a></li>
+                                            <li class="divider"></li>
+                                            <li class="dropdown dropdown-submenu">
+                                                <a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                                    class="dropdown-toggle" data-toggle="dropdown">Dropdown Submenu
+                                                    Link 5.4</a>
+                                                <ul class="dropdown-menu">
+                                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                            Submenu Link 5.4.1</a></li>
+                                                    <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                            Submenu Link 5.4.2</a></li>
+                                                    <li class="divider"></li>
+                                                    <li class="dropdown dropdown-submenu">
+                                                        <a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                                            class="dropdown-toggle" data-toggle="dropdown">Dropdown
+                                                            Submenu Link 5.4.3</a>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu Link 5.4.3.1</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu Link 5.4.3.2</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu Link 5.4.3.3</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu Link 5.4.3.4</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="dropdown dropdown-submenu"><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#"
+                                                            class="dropdown-toggle" data-toggle="dropdown">Dropdown
+                                                            Submenu Link 5.4.4</a>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu Link 5.4.4.1</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu Link 5.4.4.2</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu Link 5.4.4.3</a></li>
+                                                            <li><a href="https://s.codepen.io/boomerang/iFrameKey-ec4521f3-35f4-73c0-208c-8468e0f59b4c/index.html#">Dropdown
+                                                                    Submenu Link 5.4.4.4</a></li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div><!-- /.navbar-collapse -->
+                </nav>
+
+            </div>
+        </div>
+    </div>
+    <script src="./info_files/stopExecutionOnTimeout-41c52890748cd7143004e05d3c5f786c66b19939c4500ce446314d1748483e13.js.下载"></script>
+    <script src="./info_files/jquery.min.js.下载"></script>
+    <script src="./info_files/bootstrap.min.js.下载"></script>
+    <script>(function ($) {
+            $(document).ready(function () {
+                $('ul.dropdown-menu [data-toggle=dropdown]').on('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    $(this).parent().siblings().removeClass('open');
+                    $(this).parent().toggleClass('open');
+                });
+            });
+        })(jQuery);
+      /* http://www.bootply.com/nZaxpxfiXz */
+      //# sourceURL=pen.js
+    </script>
+</body>
+
+</html>

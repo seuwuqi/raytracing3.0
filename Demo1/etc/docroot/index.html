@@ -10,7 +10,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
-    <title>Bootstrap 101 Template</title>
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -20,6 +19,8 @@
             bottom: 0px;
         }
     </style>
+    <!-- <link rel="stylesheet" href="css/bootstrap-submenu.css">
+    <script src="js/bootstrap-submenu.js" defer></script> -->
 </head>
 
 
@@ -27,30 +28,152 @@
 <body>
 
     <!--导航-->
+
     <header class="navbar fixed-top navbar-expand-sm navbar-light bg-light" style="background-color: #e3f2fd;">
         <ul class="nav nav-pills">
-            <li class="nav-item">
-                <a class="nav-link btn-light" href="javascript:;" onclick="sendMessage('2')">开始程序</a>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button"
+                    aria-haspopup="true" aria-expanded="false">Project</a>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item">New</button>
+                    <!-- <a class="dropdown-item" href="#">Open</a> -->
+                    <button class="dropdown-item" data-toggle="modal" data-target="#exampleModalCenter">Open</button>
+                    <a href="#" class="data-toggle" data-toggle="dropdown" data-submenu></a>
+                    <a class="dropdown-item" href="#">Import</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="javascript:;" onclick="sendMessage('2')">Run</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Save</a>
+                    <a class="dropdown-item" href="#">Save As</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Explore</a>
+                    <a class="dropdown-item" href="#">Statistics</a>
+                    <a class="dropdown-item" href="#">Output properties</a>
+                    <a class="dropdown-item" href="#">Properties</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Recent projects</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Close</a>
+                </div>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
-                    aria-expanded="false">设置</a>
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button"
+                    aria-haspopup="true" aria-expanded="false">Edit</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Delete</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Preferences</a>
+                    <a class="dropdown-item" href="javascript:;" onclick="setTx()">Set TX</a>
+                    <a class="dropdown-item" href="javascript:;" onclick="setRx()">Set RX</a>
+                    <a class="dropdown-item" href="javascript:;" onclick="reset()">Reset TX&RX</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button"
+                    aria-haspopup="true" aria-expanded="false">View</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Import</a>
+                    <a class="dropdown-item" href="#">Save</a>
+                    <a class="dropdown-item" href="#">Save as TIFF</a>
+                    <a class="dropdown-item" href="#">Save as JPEG</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Orthographic</a>
+                    <a class="dropdown-item" href="#">Perspective</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">3D</a>
+                    <a class="dropdown-item" href="#">2D</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Wireframe</a>
+                    <a class="dropdown-item" href="#">Soild-Body</a>
+                    <a class="dropdown-item" href="#">Hi-Lites</a>
+                    <a class="dropdown-item" href="#">2D</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Face normals</a>
+                    <a class="dropdown-item" href="#">Descriptions</a>
+                    <a class="dropdown-item" href="#">Descriptions backgrounds</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Grid</a>
+                    <a class="dropdown-item" href="#">Legend</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Reset</a>
+                    <a class="dropdown-item" href="#">Z-Scaling</a>
+                    <a class="dropdown-item" href="#">Refresh</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Study Areas</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Citys</a>
+                    <a class="dropdown-item" href="#">Terrians</a>
+                    <a class="dropdown-item" href="#">Foilage</a>
+                    <a class="dropdown-item" href="#">Floor Plans</a>
+                    <a class="dropdown-item" href="#">Citys</a>
+                    <a class="dropdown-item" href="#">Objects</a>
+                    <a class="dropdown-item" href="#">Receivers</a>
+                    <a class="dropdown-item" href="#">Transceivers</a>
+                    <a class="dropdown-item" href="#">Transmitters</a>
+                    <a class="dropdown-item" href="#">Images</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button"
+                    aria-haspopup="true" aria-expanded="false">Output</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">View</a>
+                    <a class="dropdown-item" href="#">Clear all output</a>
+                    <a class="dropdown-item" href="#">Flush output</a>
+                    <a class="dropdown-item" href="#">Reload output</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button"
+                    aria-haspopup="true" aria-expanded="false">Select</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Clear</a>
+                    <a class="dropdown-item" href="#">Center on selection</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Feature</a>
+                    <a class="dropdown-item" href="#">Structure Group</a>
+                    <a class="dropdown-item" href="#">Structure</a>
+                    <a class="dropdown-item" href="#">Sub structure</a>
+                    <a class="dropdown-item" href="#">Face</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">TX/RX set</a>
+                    <a class="dropdown-item" href="#">TX/RX point</a>
+                    <a class="dropdown-item" href="#">TX/RX point pari</a>
+                    <a class="dropdown-item" href="#">Output</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button"
+                    aria-haspopup="true" aria-expanded="false">Help</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Reference Manual</a>
+                    <a class="dropdown-item" href="#">User's guide</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Change log</a>
+                </div>
+            </li>
+            <!-- <li class="nav-item">
+                <a class="nav-link btn-light" href="javascript:;" onclick="sendMessage('2')">开始程序</a>
+            </li> -->
+            <!-- <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button"
+                    aria-haspopup="true" aria-expanded="false">设置</a>
                 <div class="dropdown-menu">
                     <button class="dropdown-item" data-toggle="modal" data-target="#exampleModalCenter">选择区域地图</button>
                     <a class="dropdown-item" href="#">建筑设置</a>
-                    <a class="dropdown-item"  href="javascript:;" onclick="sendMessage('3')">显示道路</a>
+                    <a class="dropdown-item" href="javascript:;" onclick="sendMessage('3')">显示道路</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#">亮度设置</a>
                     <a class="dropdown-item" href="#">鼠标灵敏度设置</a>
                     <a class="dropdown-item" href="#">锁定地图显示</a>
                 </div>
-            </li>
+            </li> -->
             <li class="nav-item">
-                <button type="button" class="btn btn-light" onclick="setTx()">set tx</button>
+                <!-- <button type="button" class="btn btn-light" onclick="setTx()">set tx</button>
 
                 <button type="button" class="btn btn-light" onclick="setRx()">set rx</button>
 
-                <button type="button" class="btn btn-light" onclick="reset()">reset</button>
+                <button type="button" class="btn btn-light" onclick="reset()">reset</button> -->
                 <a class="btn btn-light" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
                     aria-controls="collapseExample">
                     Setting
@@ -76,54 +199,473 @@
     <!--显示界面-->
     <div class="row">
         <div class="col-md-12">
+            <div id="webgl"></div>
+            <div class="container-fluid collapse position-absolute" id="collapseExample" style="background-color: #fffdfd;bottom:0px">
+                <div class="row">
+                    <div class="col-2">
+                        <div class="list-group" id="list-tab" role="tablist">
+                            <a class="list-group-item list-group-item-action active" id="list-feature-list" data-toggle="list"
+                                href="#list-feature" role="tab" aria-controls="home">Feature</a>
+                            <a class="list-group-item list-group-item-action" id="list-materials-list" data-toggle="list"
+                                href="#list-materials" role="tab" aria-controls="profile">Materials</a>
+                            <a class="list-group-item list-group-item-action" id="list-waveforms-list" data-toggle="list"
+                                href="#list-waveforms" role="tab" aria-controls="messages">Waveforms</a>
+                            <a class="list-group-item list-group-item-action" id="list-antennas-list" data-toggle="list"
+                                href="#list-antennas" role="tab" aria-controls="settings">Antennas</a>
+                            <a class="list-group-item list-group-item-action" id="list-TxRx-list" data-toggle="list"
+                                href="#list-TxRx" role="tab" aria-controls="settings">Tx/Rx</a>
+                            <a class="list-group-item list-group-item-action" id="list-commsys-list" data-toggle="list"
+                                href="#list-commsys" role="tab" aria-controls="settings">Comm Systems</a>
+                            <a class="list-group-item list-group-item-action" id="list-output-list" data-toggle="list"
+                                href="#list-output" role="tab" aria-controls="settings">Output</a>
 
-            <div id="webgl" class="card card-success w-100 h-100" style="height:800px"></div>
-            <div class="collapse position-absolute" id="collapseExample" style="bottom:0px">
-                <div class="card card-body">
-                    <div style="height: 400px" class="card card-success">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr class="active">
-                                    <th>Car ID</th>
-                                    <th>RX</th>
-                                    <th>Coordinate</th>
-                                    <th>Type</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="table-success">
-                                    <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
-                                            data-placement="bottom" title="点击可以更新车辆状态">
-                                            001
-                                        </button></td>
-                                    <td>True</td>
-                                    <td>(13.5,6.2)</td>
-                                    <td>A</td>
-                                </tr>
-                                <tr class="table-danger">
-                                    <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
-                                            data-placement="bottom" title="点击可以更新车辆状态">
-                                            002
-                                        </button></td>
-                                    <td>False</td>
-                                    <td>(14.5,7.5)</td>
-                                    <td>A</td>
-                                </tr>
-                                <tr class="table-danger">
-                                    <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
-                                            data-placement="bottom" title="点击可以更新车辆状态">
-                                            003
-                                        </button></td>
-                                    <td>False</td>
-                                    <td>(17.7,5.2)</td>
-                                    <td>A</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="list-feature" role="tabpanel" aria-labelledby="list-feature-list">
+                                Feature 是需要读取的地图文件，这儿我们目前仅仅支持dbf和shp文件，读取之后会在这儿显示，Active表示是否在3D中显示，Type表示地图的种类，例如城市地图和乡村地图
+                                <table class="table table-hover table-bordered">
+                                    <thead class="thead-light">
+                                        <tr class="active">
+                                            <th>ID</th>
+                                            <th>Active</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    001
+                                                </button></td>
+                                            <td>RX</td>
+                                            <td id="TX_Coordinate">(13.5,6.2)</td>
+                                            <td>A</td>
+                                        </tr>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    002
+                                                </button></td>
+                                            <td>TX</td>
+                                            <td id="RX_Coordinate">(14.5,7.5)</td>
+                                            <td>A</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="list-materials" role="tabpanel" aria-labelledby="list-materials-list">
+                                Materials表示材料属性，可以在该处选择仿真所采用的材料
+                                <table class="table table-hover table-bordered">
+                                    <thead class="thead-light">
+                                        <tr class="active">
+                                            <th>ID</th>
+                                            <th>In use</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Feature</th>
+                                            <th>Diffuse Scattering Model</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    001
+                                                </button></td>
+                                            <td>RX</td>
+                                            <td id="TX_Coordinate">(13.5,6.2)</td>
+                                            <td>A</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                        </tr>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    002
+                                                </button></td>
+                                            <td>TX</td>
+                                            <td id="RX_Coordinate">(14.5,7.5)</td>
+                                            <td>A</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="list-waveforms" role="tabpanel" aria-labelledby="list-waveforms-list">
+                                Waveform表示波形
+                                <table class="table table-hover table-bordered">
+                                    <thead class="thead-light">
+                                        <tr class="active">
+                                            <th>ID</th>
+                                            <th>In use</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Frequency</th>
+                                            <th>Bandwidth</th>
+                                            <th>Dispersive</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    001
+                                                </button></td>
+                                            <td>RX</td>
+                                            <td id="TX_Coordinate">(13.5,6.2)</td>
+                                            <td>A</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                        </tr>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    002
+                                                </button></td>
+                                            <td>TX</td>
+                                            <td id="RX_Coordinate">(14.5,7.5)</td>
+                                            <td>A</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="list-antennas" role="tabpanel" aria-labelledby="list-antennas-list">
+                                Antennas表示天线，在这儿可以设置天线种类
+                                <table class="table table-hover table-bordered">
+                                    <thead class="thead-light">
+                                        <tr class="active">
+                                            <th>ID</th>
+                                            <th>In use</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Polarization</th>
+                                            <th>Maximum gain</th>
+                                            <th>VSWR</th>
+                                            <th>Wavefrom</th>
+                                            <th>Filename</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    001
+                                                </button></td>
+                                            <td>RX</td>
+                                            <td id="TX_Coordinate">(13.5,6.2)</td>
+                                            <td>A</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>B</td>
+                                        </tr>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    002
+                                                </button></td>
+                                            <td>TX</td>
+                                            <td id="RX_Coordinate">(14.5,7.5)</td>
+                                            <td>A</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>B</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="list-TxRx" role="tabpanel" aria-labelledby="list-TxRx-list">
+                                Tx/Rx 已经设置好的Tx和Rx，可以选择天线种类和Waveform
+                                <table class="table table-hover table-bordered">
+                                    <thead class="thead-light">
+                                        <tr class="active">
+                                            <th>ID</th>
+                                            <th>A</th>
+                                            <th>V</th>
+                                            <th>APG</th>
+                                            <th>Tx</th>
+                                            <th>Rx</th>
+                                            <th>Description</th>
+                                            <th>Type</th>
+                                            <th>No. points</th>
+                                            <th>Spacing</th>
+                                            <th>Power</th>
+                                            <th>Antenna</th>
+                                            <th>Waveform</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    001
+                                                </button></td>
+                                            <td>RX</td>
+                                            <td id="TX_Coordinate">(13.5,6.2)</td>
+                                            <td>A</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>B</td>
+                                        </tr>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    002
+                                                </button></td>
+                                            <td>TX</td>
+                                            <td id="RX_Coordinate">(14.5,7.5)</td>
+                                            <td>A</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>B</td>
+                                            <td>C</td>
+                                            <td>B</td>
+                                            <td>B</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="list-commsys" role="tabpanel" aria-labelledby="list-commsys-list">
+                                这个是以后需要添加的功能
+                                <table class="table table-hover table-bordered">
+                                    <thead class="thead-light">
+                                        <tr class="active">
+                                                <th>ID</th>
+                                                <th>Active</th>
+                                                <th>Type</th>
+                                                <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    001
+                                                </button></td>
+                                            <td>RX</td>
+                                            <td id="TX_Coordinate">(13.5,6.2)</td>
+                                            <td>A</td>
+                                        </tr>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    002
+                                                </button></td>
+                                            <td>TX</td>
+                                            <td id="RX_Coordinate">(14.5,7.5)</td>
+                                            <td>A</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="list-output" role="tabpanel" aria-labelledby="list-output-list">
+                                我将这个地方注释掉了，事实上可以放置output输出结果的
+                                <!-- <table class="table table-hover table-bordered">
+                                    <thead class="thead-light">
+                                        <tr class="active">
+                                            <th>Car ID</th>
+                                            <th>State</th>
+                                            <th>Coordinate</th>
+                                            <th>Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    001
+                                                </button></td>
+                                            <td>RX</td>
+                                            <td id="TX_Coordinate">(13.5,6.2)</td>
+                                            <td>A</td>
+                                        </tr>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                    data-placement="bottom" title="点击可以更新车辆状态">
+                                                    002
+                                                </button></td>
+                                            <td>TX</td>
+                                            <td id="RX_Coordinate">(14.5,7.5)</td>
+                                            <td>A</td>
+                                        </tr>
+                                    </tbody>
+                                </table> -->
+                            </div>
+
+                        </div>
                     </div>
                 </div>
+                <!-- <div class="accordion" id="accordionExample">
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne"
+                                    aria-expanded="true" aria-controls="collapseOne">
+                                    车辆位置信息
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+                            <div class="card-body">
+                                <div style="height: 400px" class="card card-success">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr class="active">
+                                                <th>Car ID</th>
+                                                <th>State</th>
+                                                <th>Coordinate</th>
+                                                <th>Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="table-success">
+                                                <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                        data-placement="bottom" title="点击可以更新车辆状态">
+                                                        001
+                                                    </button></td>
+                                                <td>RX</td>
+                                                <td id="TX_Coordinate">(13.5,6.2)</td>
+                                                <td>A</td>
+                                            </tr>
+                                            <tr class="table-danger">
+                                                <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                        data-placement="bottom" title="点击可以更新车辆状态">
+                                                        002
+                                                    </button></td>
+                                                <td>TX</td>
+                                                <td id="RX_Coordinate">(14.5,7.5)</td>
+                                                <td>A</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingTwo">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo"
+                                    aria-expanded="false" aria-controls="collapseTwo">
+                                    地图建筑信息
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                            <div class="card-body">
+                                <div style="height: 400px" class="card card-success">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr class="active">
+                                                <th>Car ID</th>
+                                                <th>State</th>
+                                                <th>Coordinate</th>
+                                                <th>Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="table-success">
+                                                <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                        data-placement="bottom" title="点击可以更新车辆状态">
+                                                        001
+                                                    </button></td>
+                                                <td>RX</td>
+                                                <td id="TX_Coordinate">(13.5,6.2)</td>
+                                                <td>A</td>
+                                            </tr>
+                                            <tr class="table-danger">
+                                                <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                        data-placement="bottom" title="点击可以更新车辆状态">
+                                                        002
+                                                    </button></td>
+                                                <td>TX</td>
+                                                <td id="RX_Coordinate">(14.5,7.5)</td>
+                                                <td>A</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingThree">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree"
+                                    aria-expanded="false" aria-controls="collapseThree">
+                                    日志输出
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                            <div class="card-body">
+                                <div style="height: 400px" class="card card-success">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr class="active">
+                                                <th>Car ID</th>
+                                                <th>State</th>
+                                                <th>Coordinate</th>
+                                                <th>Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="table-success">
+                                                <td><button type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
+                                                        data-placement="bottom" title="点击可以更新车辆状态">
+                                                        001
+                                                    </button></td>
+                                                <td>RX</td>
+                                                <td id="TX_Coordinate">(13.5,6.2)</td>
+                                                <td>A</td>
+                                            </tr>
+                                            <tr class="table-danger">
+                                                <td><button type="button" class="btn btn-danger btn-sm" data-toggle="tooltip"
+                                                        data-placement="bottom" title="点击可以更新车辆状态">
+                                                        002
+                                                    </button></td>
+                                                <td>TX</td>
+                                                <td id="RX_Coordinate">(14.5,7.5)</td>
+                                                <td>A</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+                <!--  -->
             </div>
-            <div class="collapse position-absolute" id="collapseExample01" style="bottom:0px;right: 0px;" >
+            <div class="collapse position-absolute" id="collapseExample01" style="bottom:0px;right: 0px;">
                 <div class="card card-body">
                     <!--数据展示部分 container-->
                     <div class="container">
@@ -186,7 +728,6 @@
     </div>
 
 
-
     <!--导入js-->
     <script type="text/javascript" src="js/three.js"></script>
     <script type="text/javascript" src="js/echarts.min.js"></script>
@@ -205,6 +746,10 @@
     <script src="js/bootstrap.min.js"></script>
     <!--websocket-->
     <script type="text/javascript">
+
+        // $(function () {
+        //     $('[data-submenu]').submenupicker();
+        // });
         var sendCode;
         function debug(message) {
             console.log(message);
@@ -248,9 +793,9 @@
                         sendMessage("cordinate");
                     } else if (sendCode == "2") {
                         drawPath(evt.data);
-                    }else if(sendCode == "3"){
+                    } else if (sendCode == "3") {
                         drawRoad(evt.data);
-                    }else if (sendCode == "cordinate"){
+                    } else if (sendCode == "cordinate") {
                         processCordinate(evt.data);
                     }
                     //debug(evt.data);
@@ -506,21 +1051,21 @@
             var pointX = [];
             var pointY = [];
             var pointZ = [];
-            for (var i = 0; i < senario.features.length; i++){
+            for (var i = 0; i < senario.features.length; i++) {
                 var pointXX = [];
                 var pointYY = [];
                 var coords = senario.features[i].coordinates;
-                for (var j = 0; j < coords.length; j ++) {
+                for (var j = 0; j < coords.length; j++) {
                     var x = coords[j][0];
                     var y = coords[j][1];
-                    pointXX.push(  (x - (xmax + xmin)/ 2)/(xmax - xmin) * 80 );
-                    pointYY.push(  (y - (ymax + ymin)/ 2)/(xmax - xmin) * 80 );
+                    pointXX.push((x - (xmax + xmin) / 2) / (xmax - xmin) * 80);
+                    pointYY.push((y - (ymax + ymin) / 2) / (xmax - xmin) * 80);
                     // pointXX.push(  (x - xmin)/(xmax - xmin) * 80 );
                     // pointYY.push(  (y - ymin)/(xmax - xmin) * 80 );
                 }
                 pointX.push(pointXX);
                 pointY.push(pointYY);
-                pointZ.push(  (senario.features[i].z) / 80 *  (118.813658- 118.728997)/( xmax - xmin));
+                pointZ.push((senario.features[i].z) / 80 * (118.813658 - 118.728997) / (xmax - xmin));
 
             }
             for (var i = 0; i < pointX.length; i++) {
@@ -588,23 +1133,23 @@
             ymax = obj.ymax;
             ymin = obj.ymin;
         }
-        function drawRoad(result){
+        function drawRoad(result) {
             var obj = JSON.parse(result);
             console.log(obj[0][0].x);
             console.log(obj[0][0].y);
 
-            for(var p in obj){
+            for (var p in obj) {
                 var list = obj[p];
                 var geometry = new THREE.Geometry();
-                var material = new THREE.LineBasicMaterial( { vertexColors: true } );
-                var color1 = new THREE.Color( 0x444444 ), color2 = new THREE.Color( 0xFF0000 );
+                var material = new THREE.LineBasicMaterial({ vertexColors: true });
+                var color1 = new THREE.Color(0x444444), color2 = new THREE.Color(0xFF0000);
                 for (var i = 0; i < list.length - 1; i++) {
                     var p1 = new THREE.Vector3(list[i].y, 0, list[i].x);
                     var p2 = new THREE.Vector3(list[i + 1].y, 0, list[i + 1].x);
                     geometry.vertices.push(p1);
                     geometry.vertices.push(p2);
-                    geometry.colors.push( color1, color2 );
-                    var line = new THREE.Line( geometry, material, THREE.LineSegments );
+                    geometry.colors.push(color1, color2);
+                    var line = new THREE.Line(geometry, material, THREE.LineSegments);
                     scene.add(line);
                 }
 
@@ -624,8 +1169,8 @@
                 var material = new THREE.LineBasicMaterial({ vertexColors: true });
                 var color1 = new THREE.Color(0x444444), color2 = new THREE.Color(0xFF0000);
                 for (let i = 0; i < path.length; i++) {
-                    path[i].x = (path[i].x - (xmax + xmin) / 2)/(xmax - xmin) *80;
-                    path[i].y = (path[i].y - (ymax + ymin)/ 2)/(xmax - xmin) * 80;
+                    path[i].x = (path[i].x - (xmax + xmin) / 2) / (xmax - xmin) * 80;
+                    path[i].y = (path[i].y - (ymax + ymin) / 2) / (xmax - xmin) * 80;
                 }
                 for (var i = 0; i < path.length - 1; i++) {
                     var p1 = new THREE.Vector3(path[i].y, 0.5, path[i].x);
@@ -795,8 +1340,8 @@
             container = document.getElementById('webgl')
             //document.body.appendChild(container);
 
-            var width = window.innerWidth;
-            var height = window.innerHeight;
+            var width = document.documentElement.clientWidth;
+            var height = document.documentElement.clientHeight;
             scene = new THREE.Scene(); //创建一个新场景
             //添加一个透视相机
             camera = new THREE.PerspectiveCamera(30,
@@ -832,8 +1377,8 @@
             plane();
 
 
-            var gridHelper = new THREE.GridHelper( 80, 30 );
-            scene.add( gridHelper );
+            var gridHelper = new THREE.GridHelper(80, 30);
+            scene.add(gridHelper);
             window.addEventListener('resize', onWindowResize, false);
             // dragControlInit();
             //  var gridHelper = new THREE.GridHelper( 50, 100 );
@@ -843,7 +1388,7 @@
 
         function plane() {
             var geometry = new THREE.PlaneBufferGeometry(100, 100);
-            geometry.rotateX(- Math.PI/2 );
+            geometry.rotateX(- Math.PI / 2);
             plane = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: "#696969", visible: true }));
             scene.add(plane);
             objects.push(plane);
@@ -1174,10 +1719,10 @@
             cxt.font = "15px Arial";
             cxt.clearRect(0, 0, 200, 40);
             var x = intersect.point.z;
-            var y =  intersect.point.x;
+            var y = intersect.point.x;
 
-            var longitude = x/80*(xmax - xmin) + (xmax + xmin) / 2;
-            var latitude  = y/80*(xmax - xmin) + (ymax + ymin)  / 2;
+            var longitude = x / 80 * (xmax - xmin) + (xmax + xmin) / 2;
+            var latitude = y / 80 * (xmax - xmin) + (ymax + ymin) / 2;
 
             cxt.fillText(longitude, 10, 18);
             cxt.fillText(latitude, 10, 33);
@@ -1194,12 +1739,13 @@
                 load3DS(intersect, "tx");
                 scene.remove(rollOverMesh);
                 var x = intersect.point.z;
-                var y =  intersect.point.x;
-                var longitude = x/80*(xmax - xmin) + (xmax + xmin) / 2;
-                var latitude  = y/80*(xmax - xmin) + (ymax + ymin)  / 2;
-                TxDTO = { "type" : "tx","longitude" : longitude , "latitude" : latitude};
+                var y = intersect.point.x;
+                var longitude = x / 80 * (xmax - xmin) + (xmax + xmin) / 2;
+                var latitude = y / 80 * (xmax - xmin) + (ymax + ymin) / 2;
+                TxDTO = { "type": "tx", "longitude": longitude, "latitude": latitude };
+                $("#TX_Coordinate").html("(" + longitude + "," + latitude + ")");
                 var str = JSON.stringify(TxDTO);
-                sendMessage(str);
+                //sendMessage(str);
             }
 
             orbitControls.enabled = true;
@@ -1219,10 +1765,11 @@
                 load3DS(intersect, "rx");
                 scene.remove(rollOverMesh);
                 var x = intersect.point.z;
-                var y =  intersect.point.x;
-                var longitude = x/80*(xmax - xmin) + (xmax + xmin) / 2;
-                var latitude  = y/80*(xmax - xmin) + (ymax + ymin)  / 2;
-                RxDTO = { "type": "rx", "longitude" : longitude , "latitude" : latitude};
+                var y = intersect.point.x;
+                var longitude = x / 80 * (xmax - xmin) + (xmax + xmin) / 2;
+                var latitude = y / 80 * (xmax - xmin) + (ymax + ymin) / 2;
+                RxDTO = { "type": "rx", "longitude": longitude, "latitude": latitude };
+                $("#RX_Coordinate").html("(" + longitude + "," + latitude + ")");
                 var str = JSON.stringify(RxDTO);
                 sendMessage(str);
             }
@@ -1279,14 +1826,14 @@
 
             var file = fileInput.files[0];
 
-            if (!(file.name.endsWith('.shp') )) {
+            if (!(file.name.endsWith('.shp'))) {
                 alert('Can only upload shp file.');
                 return false;
             }
             // 读取文件:
             var reader = new FileReader();
-            reader.onload = function(e) {
-                  shpBuffer = e.target.result;
+            reader.onload = function (e) {
+                shpBuffer = e.target.result;
 
             };
             reader.readAsArrayBuffer(file);
@@ -1298,13 +1845,13 @@
             var file = fileInput2.files[0];
 
 
-            if (!(file.name.endsWith('.dbf') )) {
+            if (!(file.name.endsWith('.dbf'))) {
                 alert('Can only upload dbf file.');
                 return false;
             }
             // 读取文件:
             var reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 dbfBuffer = e.target.result;
             };
             reader.readAsArrayBuffer(file);
@@ -1312,21 +1859,21 @@
         });
 
         function parseFile() {
-            shapefile.open(shpBuffer,dbfBuffer)
+            shapefile.open(shpBuffer, dbfBuffer)
                 .then(source => source.read()
                     .then(function log(result) {
                         if (result.done) return;
                         var feature = {
-                            coordinates : result.value.geometry.coordinates[0],
-                            z : result.value.properties.HEIGHT
+                            coordinates: result.value.geometry.coordinates[0],
+                            z: result.value.properties.HEIGHT
                         }
                         features.push(feature);
                         return source.read().then(log);
 
                     }).then(function () {
                         senario = {
-                            features : features,
-                            bbox : source.bbox
+                            features: features,
+                            bbox: source.bbox
                         }
                         xmin = source.bbox[0];
                         ymin = source.bbox[1];
@@ -1342,7 +1889,22 @@
                 .catch(error => console.error(error.stack));
         }
 
+        // //$('[data-submenu]').submenupicker();
+        // $(function () {
 
+
+        //     // Dropdown fix
+        //     $('.dropdown > a[tabindex]').keydown(function (event) {
+        //         // 13: Return
+
+        //         if (event.keyCode == 13) {
+        //             $(this).dropdown('toggle');
+        //         }
+        //     });
+
+
+        //     $('.dropdown-submenu > a').submenupicker();
+        // });
     </script>
 </body>
 
