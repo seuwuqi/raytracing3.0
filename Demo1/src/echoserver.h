@@ -23,7 +23,8 @@ class EchoServer : public QObject
 public:
     QMap<QString,QVariant> mapMap;
     double xmax, xmin, ymax, ymin;
-    Scene* scene = new Scene();
+    Scene* scene;
+    QJsonObject sceneDate;
 // {"0":[{}]}
     explicit EchoServer(quint16 port, bool debug = false, QObject *parent = nullptr);
     ~EchoServer();
@@ -38,13 +39,12 @@ private Q_SLOTS:
     void socketDisconnected();
     void updateBuilding();
     void updateRoad();
-
-    QString rayTracing();
+    void updateScene(QJsonObject jsonObject);
+    QString VPL();
 private:
     QWebSocketServer *m_pWebSocketServer;
     QList<QWebSocket *> m_clients;
     bool m_debug;
-    Scene* updateScene(QJsonObject jsonObject);
     Node* receivedTx;
     Node* receivedRx;
 };

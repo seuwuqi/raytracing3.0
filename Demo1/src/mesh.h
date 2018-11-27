@@ -25,6 +25,8 @@ public:
     Voxel* voxelMesh;
     //rx
     Node* Rx;
+
+    double* bbox;
 public:
     Mesh(){
 
@@ -40,8 +42,11 @@ public:
     Mesh(int size, Scene* scene,Node* rx){
         this->size = size;
         voxelMesh = new Voxel[ size * size];
+        rx->x = rx->x * size;
+        rx->y = rx->y * size;
         setMesh(scene,rx);
         Rx = rx;
+        bbox = scene->bbox;
     }
 
     ~Mesh(){
