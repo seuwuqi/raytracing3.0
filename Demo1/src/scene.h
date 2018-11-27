@@ -15,7 +15,7 @@ class Scene
 {
 
 public:
-    int bbox[4];
+    double bbox[4];
     vector<Object*> objList;
 public:
     Scene() {

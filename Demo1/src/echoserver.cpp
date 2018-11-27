@@ -24,7 +24,6 @@ EchoServer::EchoServer(quint16 port, bool debug, QObject *parent) :
                 this, &EchoServer::onNewConnection);
         connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &EchoServer::closed);
     }
-//    updateBuilding();
 }
 //! [constructor]
 
@@ -65,7 +64,8 @@ void EchoServer::processTextMessage(QString message)
         }else if(message == "2"){
 //          射线追踪
 
-            QString data = rayTracing();
+//            QString data = rayTracing();
+            QString data = VPL();
             pClient->sendTextMessage(data);
         }else if(message == '3'){
 //          更新道路
@@ -110,9 +110,8 @@ void EchoServer::processTextMessage(QString message)
                    receivedRx = new Node(x, y);
                }else if(type == "senario"){
 
-                    updateScene(jsonObject);
-
-//                    qDebug() << features;
+                    sceneDate = jsonObject;
+                    updateScene(sceneDate);
                }
 
 
@@ -150,71 +149,71 @@ void EchoServer::socketDisconnected()
 }
 //! [socketDisconnected]
 
-QString EchoServer::rayTracing(){
-//    FilePoint *filePoint = new FilePoint();
-//    FileManager *fileManager = new FileManager("E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.shp",
-//                                               "E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.dbf");
-//    fileManager->readDbfFile(filePoint);
-//    fileManager->readShpFile(filePoint);
-//    qDebug() <<"xmax:"<<filePoint->Xmax;
-//    qDebug() <<"xmin"<<filePoint->Xmin;
-//    qDebug() <<"ymax"<<filePoint->Ymax;
-//    qDebug() <<"ymin"<<filePoint->Ymin;
-//    filePoint->uniformlize(xmax - xmin);
-//    Scene* scene = new Scene(filePoint->allPointList, filePoint->index);
-    if(scene == nullptr){
-        qDebug() << "scene has not been initialized";
-        return "scene has not been initialized";
-    }
-    qDebug() << "scene size : "<<scene->objList.size();
-    Node* rx = new Node(receivedRx->x * 30, receivedRx->y * 30, 0.0, true);
-    Mesh* mesh = new Mesh(30, scene, rx);
-//    射线追踪器
-    Tracer*  tracer = new Tracer(mesh);
-    //source = new  Node(14.5, 7.5, 16);
-    //tracer->traceAll(source);
-    for (double i = 0; i < 360;i+= 2)
-    {
-        Node* source = new Node(receivedTx->x * mesh->size, receivedTx->y * mesh->size, i);
-        tracer->srcList.push_back(source);
-        source->vSpread[0] = -90 * 3.14 / 180;
-        source->vSpread[1] = 90 * 3.14 / 180;
-        source->type = Tx;
-        source->z = 0.5;
-        source->range[0] = source->range[1] = 0.2;
-        tracer->traceAll(source);
-        //qDebug() << "i:" << i ;
-    }
 
-    QMap<QString,QVariant> data;
+//QJsonObject json;
+//json.insert("type", QString("output"));
+//QJsonArray paths;
+//for(int i = 0; i < 10; i++){
+//    QJsonObject path;
+//    for(int j = 0; j < 5 ; j++){
+//        path.insert("pathloss",j+2);
+//        QJsonArray nodeList;
+//        for(int k = 0; k < 3; k++){
+//            QJsonObject point;
+//            point.insert("x",1);
+//            point.insert("y",1);
+//            point.insert("z",1);
+//            nodeList.insert(k,point);
+//        }
+//        path.insert("nodeList",nodeList);
+//    }
+//    paths.insert(i,path);
+//}
+//json.insert("paths",paths);
+//QJsonDocument doc(json);
+//QString strJson(doc.toJson(QJsonDocument::Compact));
+QString EchoServer::VPL(){
+    updateScene(sceneDate);
+    qDebug() << "scene size : "<<scene->objList.size();
+    Node* rx = new Node(receivedRx->x, receivedRx->y, 0.0, true);
+    Mesh* mesh = new Mesh(30, scene, rx);
+    Node* source = new Node(receivedTx->x * mesh->size, receivedTx->y * mesh->size, 0);
+    source->type = NodeType::Tx;
+//    射线追踪器
+    Tracer*  tracer = new Tracer(mesh,source);
+    tracer->verticalPlane(source);
+    qDebug()<<tracer->allPath.size()<<" paths has been accepted";
+//    QMap<QString,QVariant> data;
+    QJsonObject json;
+    json.insert("type", QString("output"));
+    QJsonArray paths;
     for(int i = 0; i < tracer->allPath.size(); i++){
-        Path* path = tracer->allPath[i];
-        list<Node*> nodes = path->nodes;
-        list<Node*>:: iterator iter;
-        QList<QVariant> list;
-        for(iter = nodes.begin(); iter != nodes.end(); iter++){
-            QMap<QString,QVariant> map;
-            Node* node = *iter;
-//            还原成经纬度坐标
-            double x = node->x / mesh->size * (xmax - xmin) + xmin;
-            double y = node->y / mesh->size * (xmax - xmin) + ymin;
-            map.insert("x", x);
-            map.insert("y", y);
-            map.insert("z", (node->z));
-            list.append(QVariant(map));
+        QJsonObject path;
+        Path* p = tracer->allPath[i];
+        path.insert("pathloss",p->channelGain(0));
+        QJsonArray nodeList;
+        for(int j = 0; j < p->nodeSet.size() ; j++){
+            Node* node = p->nodeSet[j];
+            QJsonObject point;
+            point.insert("x",node->x);
+            point.insert("y",node->y);
+            point.insert("z",node->z);
+            nodeList.insert(j,point);
         }
-        data.insert(QString::number(i,10),QVariant(list));
+        path.insert("nodeList",nodeList);
+        paths.insert(i,path);
     }
-    QJsonObject qjss=QJsonObject::fromVariantMap(data);
-    QJsonDocument doc(qjss);
+    json.insert("paths",paths);
+    QJsonDocument doc(json);
     QString strJson(doc.toJson(QJsonDocument::Compact));
     return strJson;
 }
 
-Scene* EchoServer::updateScene(QJsonObject jsonObject){
+
+void EchoServer::updateScene(QJsonObject jsonObject){
     QJsonArray features = jsonObject["features"].toArray();
     QJsonArray bbox = jsonObject["bbox"].toArray();
-
+    scene = new Scene();
 //    reset
     scene->bbox[0] = xmin = bbox[0].toDouble();
     scene->bbox[1] = ymin = bbox[1].toDouble();
@@ -238,12 +237,10 @@ Scene* EchoServer::updateScene(QJsonObject jsonObject){
         }
 
         obj->setEdgeList(obj->pointList);
-        qDebug() << obj->pointList.size();
-        qDebug() << obj->edgeList.size();
+//        qDebug() << obj->pointList.size();
+//        qDebug() << obj->edgeList.size();
         scene->objList.push_back(obj);
     }
-
-    return scene;
 }
 void EchoServer::updateRoad(){
     mapMap.clear();
