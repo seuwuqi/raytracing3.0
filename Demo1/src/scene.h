@@ -16,6 +16,7 @@ class Scene
 
 public:
     double bbox[4];
+    double factor;
     vector<Object*> objList;
 public:
     Scene() {

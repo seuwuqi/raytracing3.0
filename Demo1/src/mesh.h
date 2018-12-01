@@ -27,6 +27,7 @@ public:
     Node* Rx;
 
     double* bbox;
+    double factor;
 public:
     Mesh(){
 
@@ -47,6 +48,7 @@ public:
         setMesh(scene,rx);
         Rx = rx;
         bbox = scene->bbox;
+        factor =scene->factor;
     }
 
     ~Mesh(){

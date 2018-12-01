@@ -97,15 +97,15 @@ void EchoServer::processTextMessage(QString message)
                if(type == "tx"){
                    double longitude =  jsonObject["longitude"].toDouble();
                    double latitude=  jsonObject["latitude"].toDouble();
-                   double x = (longitude - xmin)/(xmax - xmin);
-                   double y = (latitude - ymin)/(xmax - xmin);
+                   double x = (longitude - xmin)/(factor);
+                   double y = (latitude - ymin)/(factor);
                    qDebug() << "x:" << x*30 << "y:" << y*30;
                    receivedTx = new Node(x,y);
                }else if(type == "rx"){
                    double longitude =  jsonObject["longitude"].toDouble();
                    double latitude=  jsonObject["latitude"].toDouble();
-                   double x = (longitude - xmin)/(xmax - xmin);
-                   double y = (latitude - ymin)/(xmax - xmin);
+                   double x = (longitude - xmin)/(factor);
+                   double y = (latitude - ymin)/(factor);
                    qDebug() << "x:" << x*30 << "y:" << y*30;
                    receivedRx = new Node(x, y);
                }else if(type == "senario"){
@@ -150,28 +150,6 @@ void EchoServer::socketDisconnected()
 //! [socketDisconnected]
 
 
-//QJsonObject json;
-//json.insert("type", QString("output"));
-//QJsonArray paths;
-//for(int i = 0; i < 10; i++){
-//    QJsonObject path;
-//    for(int j = 0; j < 5 ; j++){
-//        path.insert("pathloss",j+2);
-//        QJsonArray nodeList;
-//        for(int k = 0; k < 3; k++){
-//            QJsonObject point;
-//            point.insert("x",1);
-//            point.insert("y",1);
-//            point.insert("z",1);
-//            nodeList.insert(k,point);
-//        }
-//        path.insert("nodeList",nodeList);
-//    }
-//    paths.insert(i,path);
-//}
-//json.insert("paths",paths);
-//QJsonDocument doc(json);
-//QString strJson(doc.toJson(QJsonDocument::Compact));
 QString EchoServer::VPL(){
     updateScene(sceneDate);
     qDebug() << "scene size : "<<scene->objList.size();
@@ -219,6 +197,7 @@ void EchoServer::updateScene(QJsonObject jsonObject){
     scene->bbox[1] = ymin = bbox[1].toDouble();
     scene->bbox[2] = xmax = bbox[2].toDouble();
     scene->bbox[3] = ymax = bbox[3].toDouble();
+    scene->factor = factor = (xmax - xmin) > (ymax - ymin)? (xmax - xmin) : (ymax - ymin);
     scene->objList.clear();
     qDebug() << xmin << ymin << xmax << ymax;
     for(QJsonValue feature : features){
@@ -229,8 +208,8 @@ void EchoServer::updateScene(QJsonObject jsonObject){
         for(QJsonValue coord : coordinates){
             double x = coord.toArray()[0].toDouble();
             double y = coord.toArray()[1].toDouble();
-            x = (x - xmin) / (xmax - xmin);
-            y = (y - ymin) / (xmax - xmin);
+            x = (x - xmin) / factor;
+            y = (y - ymin) / factor;
 //            qDebug() << "x:" << x << "y:" << y << "z:" << z;
             obj->pointList.push_back(new Point(x, y ,z ));
 

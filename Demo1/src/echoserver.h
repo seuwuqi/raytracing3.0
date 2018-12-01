@@ -23,6 +23,7 @@ class EchoServer : public QObject
 public:
     QMap<QString,QVariant> mapMap;
     double xmax, xmin, ymax, ymin;
+    double factor;
     Scene* scene;
     QJsonObject sceneDate;
 // {"0":[{}]}

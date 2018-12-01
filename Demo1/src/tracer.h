@@ -303,11 +303,6 @@ public:
     }
 
     Point* Intersection(Point* p1, Point* p2, Point* p3, Point* p4){
-//            qDebug() << "_______+++++___++_____";
-//            qDebug() << p1->x <<","<< p1->y;
-//            qDebug() << p2->x <<","<< p2->y;
-//            qDebug() << p3->x <<","<< p3->y;
-//            qDebug() << p4->x <<","<< p4->y;
             double s1 = direction(p1,p2,p3);
 //            qDebug() << s1;
 
@@ -393,8 +388,8 @@ public:
             vector<Node*> tmp;
             for(int i = 0; i < nodeList.size(); i++){
                 //恢复到坐标表示
-                double x = nodeList[i]->x / 30.0 * (mesh->bbox[2]- mesh->bbox[0]) + mesh->bbox[0];
-                double y = nodeList[i]->y / 30.0 * (mesh->bbox[2]- mesh->bbox[0]) + mesh->bbox[1];
+                double x = nodeList[i]->x / 30.0 * (mesh->factor) + mesh->bbox[0];
+                double y = nodeList[i]->y / 30.0 * (mesh->factor) + mesh->bbox[1];
 //                qDebug() << "....................";
 //                qDebug() << x;
 //                qDebug() << y;

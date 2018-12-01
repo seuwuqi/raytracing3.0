@@ -27,45 +27,51 @@
 <body>
 
     <!--导航-->
-    <header class="navbar fixed-top navbar-expand-sm navbar-light bg-light" style="background-color: #e3f2fd;">
+    <header id = "navigate" class="navbar fixed-top navbar-expand-sm navbar-light bg-light" style="background-color: #e3f2fd;">
         <ul class="nav nav-pills">
             <li class="nav-item">
                 <a class="nav-link btn-light" href="javascript:;" onclick="sendMessage('2')">开始程序</a>
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
-                    aria-expanded="false">设置</a>
+                                         aria-expanded="false">设置场景</a>
                 <div class="dropdown-menu">
                     <button class="dropdown-item" data-toggle="modal" data-target="#exampleModalCenter">打开地图文件</button>
-                    <a class="dropdown-item" href="javascript:;" onclick="parseFile()">默认地图</a>
                     <button class="dropdown-item" data-toggle="modal" data-target="#roadfile">打开道路文件</button>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">亮度设置</a>
-                    <a class="dropdown-item" href="#">鼠标灵敏度设置</a>
-                    <a class="dropdown-item" href="#">锁定地图显示</a>
+                    <button class="dropdown-item" data-toggle="modal" data-target="#sceneChoice">选择默认场景</button>
+                    <a class="dropdown-item" href="javascript:;" onclick="parseFile()">默认地图</a>
+                    <a class="dropdown-item" href="javascript:;" onclick="parseDefaultfile('seu')">东南大学</a>
+                    <a class="dropdown-item" href="javascript:;" onclick="parseDefaultfile('nhdx')">内环东线</a>
+                    <a class="dropdown-item" href="javascript:;" onclick="parseDefaultfile('zsl')">中山路</a>
+                    <a class="dropdown-item" href="javascript:;" onclick="location.reload()">重置场景</a>
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                   aria-expanded="false">设置车辆</a>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" data-toggle="modal" data-target="#vehicleModal">添加车辆</button>
+                    <a class="dropdown-item" href="javascript:;"  onclick="setTx('tx')">添加Tx</a>
+                    <a class="dropdown-item" href="javascript:;"  onclick="setTx('rx')">添加Rx</a>
+                    <a class="dropdown-item" href="javascript:;"  onclick="setTx('other')">添加车辆</a>
+                    <a class="dropdown-item" href="javascript:;"  onclick="reset()">重置</a>
+                    <div class="dropdown-divider"></div>
                 </div>
             </li>
             <li class="nav-item">
-                <button type="button" class="btn btn-light" onclick="setTx()">set tx</button>
-
-                <button type="button" class="btn btn-light" onclick="setRx()">set rx</button>
-
-                <button type="button" class="btn btn-light" onclick="reset()">reset</button>
                 <a class="btn btn-light" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
                     aria-controls="collapseExample">
-                    Setting
+                    图层信息
                 </a>
                 <a class="btn btn-light" data-toggle="collapse" href="#collapseExample01" role="button" aria-expanded="false"
                     aria-controls="collapseExample01">
-                    Output
+                    输出结果
                 </a>
 
             </li>
 
 
-            <li class="nav-item">
-                <a class="nav-link disabled" href="#">离开</a>
-            </li>
         </ul>
 
 
@@ -74,10 +80,10 @@
 
 
     <!--显示界面-->
-    <div class="row">
-        <div class="col-md-12">
 
             <div id="webgl" class="card card-success w-100 h-100" style="height:800px"></div>
+            <div id="gui" class="position-absolute" width="100" style="top: 60px;left: 0px;color: white;">
+            </div>
             <div class="collapse position-absolute" id="collapseExample" style="bottom:0px">
                 <div class="card card-body">
                     <div style="height: 400px" class="card card-success">
@@ -142,18 +148,143 @@
             <canvas id="locationCanvas" class="position-absolute" width="200" height="40" style="border:1px solid #c3c3c3;top: 70px;right: 20px;color: white;">
                 Your browser does not support the canvas element.
             </canvas>
-        </div>
 
+
+
+
+    <!--模态框 车辆设置-->
+    <div class="modal fade" id="vehicleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" >新建车辆</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form >
+                        <div class="form-group row">
+                            <label for="speed" class="col-sm-2 col-form-label">车速</label>
+                            <div class="col-sm-10">
+                                <input type="number" id="speed" name="tentacles"
+                                       min="10" max="100">km/h
+                            </div>
+
+                        </div>
+                        <fieldset class="form-group">
+                            <div class="row">
+                                <legend class="col-form-label col-sm-2 pt-0">类型</legend>
+                                <div class="col-sm-10">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="tx" checked>
+                                        <label class="form-check-label" for="gridRadios1">
+                                            发射车辆
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="other">
+                                        <label class="form-check-label" for="gridRadios2">
+                                            障碍车辆
+                                        </label>
+                                    </div>
+                                    <div class="form-check disabled">
+                                        <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios3" value="rx" >
+                                        <label class="form-check-label" for="gridRadios3">
+                                            接收车辆
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="form-group row">
+                            <div class="col-sm-2">动态</div>
+                            <div class="col-sm-10">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="dynamic">
+                                    <label class="form-check-label" for="dynamic">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-10">
+                                <button data-dismiss="modal" type="submit" class="btn btn-primary" onclick="processVehicleForm()">新建</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 模态框 场景选择-->
+    <div class="modal"  id = "sceneChoice" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">场景选择</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <!--<button data-dismiss=""></button>-->
+                </div>
+                <div class="默认场景选择">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm">
+                                <a data-dismiss="modal" href="javascript:;" onclick="parseDefaultfile('seu') ">
+                                    <div  class="card" style="width: 8rem;">
+                                        <img src = "./img/东南大学.jpg" style=" height: 6rem;" class="card-img-top"  alt="Card image cap">
+                                        <div class="card-body">
+                                            <p class="card-text">东南大学</p>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+                            <div class="col-sm">
+                                <a data-dismiss="modal" href="javascript:;" onclick="parseDefaultfile('zsl')">
+
+                                    <div  class="card" style="width: 8rem ;">
+                                        <img src = "./img/中山路.jpg" style=" height: 6rem;" class="card-img-top"  alt="Card image cap">
+                                        <div class="card-body">
+                                            <p class="card-text">中山路</p>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+                            <div class="col-sm">
+                                <a  data-dismiss="modal" href="javascript:;" onclick="parseDefaultfile('nhdx')">
+                                    <div  class="card" style="width: 8rem; ">
+                                        <img src = "./img/内环东线.jpg" style=" height: 6rem;" class="card-img-top"  alt="Card image cap">
+                                        <div class="card-body">
+                                            <p class="card-text">内环东线</p>
+                                        </div>
+                                    </div>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
     </div>
 
 
 
 
-
-
-
-
-    <!-- Modal 模态框-->
+    <!-- Modal 模态框 文件选择-->
     <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -229,8 +360,19 @@
     <script src="js/controls/DragControls.js"></script>
     <script src="js/controls/TrackballControls.js"></script>
     <script src="js/Lut.js"></script>
+    <script src="js/loaders/FBXLoader.js"></script>
+    <script src="js/libs/inflate.min.js"></script>
+    <script src='js/libs/dat.gui.min.js'></script>
 
 
+    <!--line-->
+    <script src='js/lines/LineSegmentsGeometry.js'></script>
+    <script src='js/lines/LineGeometry.js'></script>
+    <script src='js/lines/WireframeGeometry2.js'></script>
+    <script src='js/lines/LineMaterial.js'></script>
+    <script src='js/lines/LineSegments2.js'></script>
+    <script src='js/lines/Line2.js'></script>
+    <script src='js/lines/Wireframe.js'></script>
     <script src="js/jquery.min.js"></script>
     <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
     <script src="js/bootstrap.min.js"></script>
@@ -519,30 +661,199 @@
         //loadXMLDoc();
 
         var mouse, raycaster, isShiftDown = false;
-        var rollOverMesh, rollOverMaterial, rollOverGeo;
+        var rollOverMesh, rollOverMaterial, rollOverGeo, rollOverLine;
         var cubeMesh;
         var objects = []; //存放平面，用于投影检测
         var builidings  = [];  //存放建筑物
         var tx = [], rx = [];
+        var vehicles = [];
         var pathLines = [];
         var roadLines = [];
+        var roadNames = [];
         var xmax , xmin , ymax , ymin ;
-
         var TxDTO;
         var RxDTO;
+        var vehicleDTO;
 
         var lut;
+
+        var layers = {
+            plane : true,
+            building: true,
+            road : true,
+            vehicles : true,
+            ray : true,
+        };
         main();
 
         render();
         loadPathLoss([1, 2, 3, 4, 5, 6], [-100, -101, -102, -103, -99, -98]);
 
+        
+        function processVehicleForm() {
+            var speed = document.getElementById("speed").value;
+            var type1 = document.getElementById("gridRadios1");
+            var type2 = document.getElementById("gridRadios2");
+            var type3 = document.getElementById("gridRadios3");
+            var dynamic = document.getElementById("dynamic");
+            var isDynamic = dynamic.checked;
+            var type;
+            if (type1.checked == true){
+                type = "tx";
+            } else if (type2.checked == true){
+                type = "other";
+            } else if(type3.checked == true){
+                type = "rx";
+            }
+            console.log(speed);
+            console.log(type);
+            console.log(isDynamic);
+            setVehicle(speed,type,isDynamic);
+        }
+
+        function setVehicle(speed,type,dynamic){
+            var vehicle = {
+                speed : speed,
+                type : type,
+                dynamic : dynamic
+            }
+            vehicles.push(vehicle);
+            orbitControls.enabled = false;
+            rollOverGeo = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
+            rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true });
+            rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
+
+
+            var geometry = new THREE.LineGeometry();
+            geometry.setPositions( [0,0,0,0,0,0] );
+            // geometry.setColors( colors );
+            var matLine = new THREE.LineMaterial( {
+                color: "#222221",
+                linewidth: 0.002,
+                // vertexColors: THREE.VertexColors,
+                dashed: true
+            } );
+            rollOverLine = new THREE.Line2( geometry, matLine );
+            rollOverLine.computeLineDistances();
+            rollOverLine.scale.set( 1, 1, 1 );
+            scene.add( rollOverLine );
+
+            scene.add(rollOverMesh);
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+            vehicleType = type;
+            dynamicMod = dynamic;
+            count = 0;
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+            document.addEventListener('mousedown', onDocumentMouseDown, false);
+
+        }
+
+
+        var vehicleType;
+        var vehicleSpeed;
+        var dynamicMod;
+        var count;
+        var startPoint;
+        function onDocumentMouseMove(event) {
+            event.preventDefault();
+            mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
+            raycaster.setFromCamera(mouse, camera);
+            var intersects = raycaster.intersectObjects(objects);
+            var intersect;
+            if (intersects.length > 0) {
+                intersect = intersects[0];
+                rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
+                //rollOverMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
+            }
+            var canvas = document.getElementById("locationCanvas");
+            var cxt = canvas.getContext("2d");
+            cxt.font = "15px Arial";
+            cxt.clearRect(0, 0, 200, 40);
+            var x = intersect.point.z;
+            var y = intersect.point.x;
+            var longitude = x / 80 * (xmax - xmin) + (xmax + xmin) / 2;
+            var latitude = y / 80 * (xmax - xmin) + (ymax + ymin) / 2;
+
+            cxt.fillText(longitude, 10, 18);
+            cxt.fillText(latitude, 10, 33);
+
+            if(startPoint != undefined){
+                var positions = [];
+                positions.push(y,0.1,x);
+                positions.push(startPoint.y,0.1,startPoint.x);
+                rollOverLine.geometry.setPositions(positions);
+            }
+            //render();
+        }
+        //设置TX
+        function onDocumentMouseDown(event) {
+            event.preventDefault();
+            mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
+            raycaster.setFromCamera(mouse, camera);
+            var intersects = raycaster.intersectObjects(objects);
+            if (intersects.length > 0) {
+                var intersect = intersects[0];
+                count  += 1;
+                if(count == 2){//动态模式
+
+                    var triangleShape = new THREE.Shape();
+                    triangleShape.moveTo( 0, 0 );
+                    triangleShape.lineTo( 0.5, 1 );
+                    triangleShape.lineTo( 1, 0.5);
+                    triangleShape.lineTo( 0, 0 ); // close path
+                    var geometry = new THREE.ShapeBufferGeometry( triangleShape );
+                    var mesh = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( {side: THREE.DoubleSide, color : "#000000"} ) );
+
+                    console.log(intersect.point.x);
+                    console.log(startPoint.y);
+                    console.log(intersect.point.z);
+                    console.log(startPoint.x);
+                    var angle = Math.atan((intersect.point.x - startPoint.y)
+                        / (intersect.point.z - startPoint.x));
+                    if(intersect.point.z - startPoint.x < 0){
+                        angle += Math.PI;
+                    }
+                    console.log(angle);
+                    mesh.position.copy(intersect.point);
+                    mesh.position.y = 0.1;
+                    mesh.rotation.set( Math.PI / 2, 0, Math.PI * 5 / 4 );
+                    mesh.rotateZ(2 * Math.PI - angle);
+                    mesh.scale.set( 2, 2, 2 );
+                    scene.add(mesh);
+
+                }else{
+                    if (vehicleType == "other"){
+                        loadFbx(intersect,vehicleType)
+                    } else {
+                        load3DS(intersect, vehicleType);
+                    }
+                }
+
+                scene.remove(rollOverMesh);
+                var x = intersect.point.z;
+                var y =  intersect.point.x;
+                var longitude = x/80*(xmax - xmin) + (xmax + xmin) / 2;
+                var latitude  = y/80*(xmax - xmin) + (ymax + ymin)  / 2;
+                vehicleDTO = { "speed" : vehicleSpeed, "type" : vehicleType,"longitude" : longitude , "latitude" : latitude};
+
+                var str = JSON.stringify(vehicleDTO);
+                sendMessage(str);
+
+            }
+            if (dynamicMod == undefined || dynamicMod == false || count == 2){
+                count = 0;
+                startPoint = undefined;
+                orbitControls.enabled = true;
+                dynamicMod = false;
+                document.removeEventListener('mousemove', onDocumentMouseMove, false);
+                document.removeEventListener('mousedown', onDocumentMouseDown, false);
+            }else{
+                startPoint = {x : x, y : y};
+            }
+        }
         function drawSenario(senario,mod) {
 
-            var xmin = senario.bbox[0];
-            var ymin = senario.bbox[1];
-            var xmax = senario.bbox[2];
-            var ymax = senario.bbox[3];
             var pointX = [];
             var pointY = [];
             var pointZ = [];
@@ -563,25 +874,29 @@
                 pointZ.push(  (senario.features[i].z) / 80 *  (118.813658- 118.728997)/( xmax - xmin));
 
             }
+            layers.building = true;
+            camera.layers.enable( 1 );
+            builidings = [];
             for (var i = 0; i < pointX.length; i++) {
                 addMulGeometry(pointX[i], pointY[i], pointZ[i],mod);
             }
 
+            gui.add( layers, 'building' ).onChange( function () {
+                camera.layers.toggle( 1 );
+            } );
         }
-        function setTx() {
+        function setTx(type) {
             orbitControls.enabled = false;
             // roll-over helpers
-            rollOverGeo = new THREE.BoxBufferGeometry(1, 0.5, 0.7);
+            rollOverGeo = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
             rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true });
             rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
             scene.add(rollOverMesh);
-
             raycaster = new THREE.Raycaster();
             mouse = new THREE.Vector2();
+            vehicleType = type;
             document.addEventListener('mousemove', onDocumentMouseMove, false);
             document.addEventListener('mousedown', onDocumentMouseDown, false);
-            document.addEventListener('keydown', onDocumentKeyDown, false);
-            document.addEventListener('keyup', onDocumentKeyUp, false);
         }
         function hide( objs) {
             for (let i = 0; i < objs.length; i++) {
@@ -638,15 +953,26 @@
             ymin = obj.ymin;
         }
         function drawRoad(roads){
-            console.log("ok");
-            // console.log(roads);
-
+            var roadName = "init";
+            roadLines = [];
             for (let i = 0; i < roads.length; i++){
                 var geometry = new THREE.Geometry();
                 var material = new THREE.LineBasicMaterial( { vertexColors: true } );
-                var color1 = new THREE.Color( 0x444444 ), color2 = new THREE.Color( 0xFF0000 );
+                var color1 = new THREE.Color( "#FFFFFF" );
+                var color2 = new THREE.Color( "#FFFFFF");
                 var coordinates = roads[i].coordinates;
-                for(let j = 0; j < roads[i].coordinates.length - 1; j++){
+                var name = roads[i].name;
+                var direction = roads[i].direction;
+                var mid = Math.floor(coordinates.length / 2);
+                var pm = coordinates[0];
+                // console.log(mid);
+                var x = pm[0];
+                var y = pm[1];
+                x = (x- (xmax + xmin)/ 2)/(xmax - xmin) * 80;
+                y = (y- (ymax + ymin)/ 2)/(xmax - xmin) * 80;
+                // console.log(x);
+                // console.log(y);
+                for(let j = 0; j < coordinates.length - 1; j++){
                     var p1 = coordinates[j], p2 = coordinates[j+1];
                     var x1 = (p1[0] - (xmax + xmin)/ 2)/(xmax - xmin) * 80;
                     var y1 = (p1[1] - (ymax + ymin)/ 2)/(xmax - xmin) * 80;
@@ -658,10 +984,22 @@
                     geometry.vertices.push(q2);
                     geometry.colors.push( color1, color2 );
                     var line = new THREE.Line( geometry, material, THREE.LineSegments );
+                    line.layers.set( 2 );
+                    line.name = Math.random().toString(36).substr(2);
                     scene.add(line);
+                    roadLines.push(line);
                 }
-
+                if(name != roadName){
+                    // drawFont(name,x,y,direction);
+                    roadName = name;
+                }
             }
+            camera.layers.enable( 2 );
+            gui.add( layers, 'road' ).onChange( function () {
+                camera.layers.toggle( 2 );
+            } );
+
+            // gui.remove();
 
         }
 
@@ -726,9 +1064,14 @@
                     var line = new THREE.Line(geometry, material, THREE.LineSegments);
                     line.name = Math.random().toString(36).substr(2);
                     scene.add(line);
+                    line.layers.set(4);
                     pathLines.push(line);
                 }
             }
+            camera.layers.enable( 4 );
+            gui.add( layers, 'ray' ).onChange( function () {
+                camera.layers.toggle( 4 );
+            } );
 
         }
         function readFromDataToArray(result) {
@@ -840,6 +1183,34 @@
             xmlhttp.send();
         }
 
+        // model
+        function loadFbx(intersect, type){
+            var fbxloader = new THREE.FBXLoader();
+            fbxloader.load( 'bus/bus.fbx', function ( object ) {
+
+                object.traverse( function ( child ) {
+                    if ( child.isMesh ) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                } );
+                object.scale.set(0.0004, 0.0004, 0.0004);
+                object.position.copy(intersect.point);
+                object.position.y = 0.6;
+                // object.rotateX(Math.PI * 6 / 4);
+                object.rotateY(camera.rotation._z);
+                object.rotateY(Math.PI);
+                object.name = Math.random().toString(36).substr(2);
+                scene.add( object );
+                if (type == "tx") {
+                    tx.push(object);
+                } else if (type == "rx") {
+                    rx.push(object);
+                }
+            } );
+
+        }
+
         function load3DS(intersect, type) {
             var loader = new THREE.TDSLoader();
             loader.load("./Evo.3ds", function (object) {
@@ -852,8 +1223,12 @@
                 object.scale.set(0.002, 0.002, 0.002);
                 object.position.copy(intersect.point);
                 object.rotateX(Math.PI * 6 / 4);
-                object.rotateZ(Math.PI * 6 / 4);
+                object.rotateZ(camera.rotation._z);
+                // object.rotateZ(camera.rotation._z);
+                object.rotateZ(Math.PI);
                 object.name = Math.random().toString(36).substr(2);
+                // object.layers.set(3);
+                // camera.layers.enable( 3 );
                 scene.add(object);
                 if (type == "tx") {
                     tx.push(object);
@@ -870,6 +1245,7 @@
         var renderer2;
         var camera2;
 
+        var gui;
         function initColorMap(min, max){
             container2 = document.createElement('colorMap');
             document.body.appendChild(container2);
@@ -910,13 +1286,10 @@
             renderer2.render(scene2, camera2);
         }
 
-
-
-
         // render2();
         function main() {
             //添加一个div元素
-            container = document.getElementById('webgl')
+            container = document.getElementById('webgl');
             //document.body.appendChild(container);
             var width = window.innerWidth;
             var height = window.innerHeight;
@@ -950,10 +1323,20 @@
             var directionalLight = new THREE.DirectionalLight(0xffffff);
             directionalLight.position.set(1, 0.75, 0.5).normalize();
             scene.add(directionalLight);
-            plane();
 
+            var nav = document.getElementById("gui");
+            gui = new dat.GUI();
+            var guiDomElement = gui.domElement;
+             // guiDomElement.style.position = "relative";
+            // guiDomElement.style.top = "0px";
+            // guiDomElement.style.right = "10px";
+            // guiDomElement.style.zIndex = "20";
+            nav.appendChild(guiDomElement);
+            // container.appendChild(guiDomElement);
 
-            var gridHelper = new THREE.GridHelper( 80, 30 );
+             plane();
+
+            // var gridHelper = new THREE.GridHelper( 80, 30 );
             // scene.add( gridHelper );
             window.addEventListener('resize', onWindowResize, false);
             // dragControlInit();
@@ -963,9 +1346,13 @@
 
 
         function plane() {
-            var geometry = new THREE.PlaneBufferGeometry(100, 100);
+            var geometry = new THREE.PlaneBufferGeometry(120, 120);
             geometry.rotateX(- Math.PI/2 );
-            plane = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: "#696969", visible: true }));
+            var plane = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: "#88918c", visible: true }));
+            plane.layers.set(0);
+            gui.add( layers, 'plane' ).onChange( function () {
+                camera.layers.toggle( 0 );
+            } );
             scene.add(plane);
             objects.push(plane);
         }
@@ -982,7 +1369,6 @@
             cubeMesh.position.set(20, 10, 0); //设置立方体的坐标 几何中心
             scene.add(cubeMesh); //将立方体添加到场景中
         }
-
         //创建一个球
         function sphere() {
             var sphereGeo = new THREE.SphereGeometry(16, 40, 40); //创建球体
@@ -1009,52 +1395,23 @@
             scene.add(cylinderMesh); //向场景添加圆柱体
         }
 
-
         //画线段
-        function line() {
-            var geometry = new THREE.Geometry();
-            var material = new THREE.LineBasicMaterial({ vertexColors: true });
-            var color1 = new THREE.Color(0x444444), color2 = new THREE.Color(0xFF0000);
-
-            // 线的材质可以由2点的颜色决定
-            var p1 = new THREE.Vector3(-25, 2, -25);
-            var p2 = new THREE.Vector3(25, 2, -25);
-            geometry.vertices.push(p1);
-            geometry.vertices.push(p2);
-            geometry.colors.push(color1, color2);
-            var line1 = new THREE.Line(geometry, material, THREE.LineSegments);
-            scene.add(line1);
-
-            p1 = new THREE.Vector3(-25, 2, -25);
-            p2 = new THREE.Vector3(-25, 2, 25);
-            geometry.vertices.push(p1);
-            geometry.vertices.push(p2);
-            geometry.colors.push(color1, color2);
-            var line2 = new THREE.Line(geometry, material, THREE.LineSegments);
-            scene.add(line2);
-
-
-            p1 = new THREE.Vector3(25, 2, 25);
-            p2 = new THREE.Vector3(-25, 2, 25);
-            geometry.vertices.push(p1);
-            geometry.vertices.push(p2);
-            geometry.colors.push(color1, color2);
-            line3 = new THREE.Line(geometry, material, THREE.LineSegments);
-            scene.add(line3);
-
-            p1 = new THREE.Vector3(25, 2, 25);
-            p2 = new THREE.Vector3(25, 2, -25);
-            geometry.vertices.push(p1);
-            geometry.vertices.push(p2);
-            geometry.colors.push(color1, color2);
-            var line4 = new THREE.Line(geometry, material, THREE.LineSegments);
-            scene.add(line4);
-
-
-            scene.add(line);
+        function drawline(positions) {
+            var geometry = new THREE.LineGeometry();
+            geometry.setPositions( positions );
+            // geometry.setColors( colors );
+            var matLine = new THREE.LineMaterial( {
+                color: "#222221",
+                linewidth: 0.002,
+                // vertexColors: THREE.VertexColors,
+                dashed: false
+            } );
+            line = new THREE.Line2( geometry, matLine );
+            line.computeLineDistances();
+            line.scale.set( 1, 1, 1 );
+            scene.add( line );
         }
         // 创建建筑
-
         function addMulGeometry(arrZ, arrX, height, mod) {
             // var arrX=[4,0,0,2.5,4];
             // var arrZ=[4,4,0,-2,0];
@@ -1081,7 +1438,7 @@
 
             var geometry = new THREE.ExtrudeBufferGeometry( cityShape, extrudeSettings );
             var material = new THREE.MeshLambertMaterial({ //创建材料
-                color: 0x8DEEEE,
+                color: "#7e7d80",
                 wireframe: false
             });
             var mesh = new THREE.Mesh( geometry,  material);
@@ -1095,8 +1452,11 @@
 
             particles.rotation.x = -Math.PI / 2;
             particles.rotation.z = -Math.PI / 2;
+            mesh.layers.set(1);
+            mesh.name = Math.random().toString(36).substr(2);
             scene.add(mesh);
-            scene.add(line);
+            builidings.push(mesh);
+            // scene.add(line);
             // scene.add(particles);
         }
 
@@ -1229,7 +1589,6 @@
             var mesh = new THREE.Mesh(geometry, material);
             scene.add(mesh);
         }
-
         function addGeometry() {
             var geometry = new THREE.Geometry();
             // 设置顶点位置
@@ -1271,56 +1630,6 @@
         }
 
 
-        function onDocumentMouseMove(event) {
-            event.preventDefault();
-            mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
-            raycaster.setFromCamera(mouse, camera);
-            var intersects = raycaster.intersectObjects(objects);
-            var intersect;
-            if (intersects.length > 0) {
-                intersect = intersects[0];
-                rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
-                //rollOverMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
-            }
-            var canvas = document.getElementById("locationCanvas");
-            var cxt = canvas.getContext("2d");
-            cxt.font = "15px Arial";
-            cxt.clearRect(0, 0, 200, 40);
-            var x = intersect.point.z;
-            var y =  intersect.point.x;
-
-            var longitude = x/80*(xmax - xmin) + (xmax + xmin) / 2;
-            var latitude  = y/80*(xmax - xmin) + (ymax + ymin)  / 2;
-
-            cxt.fillText(longitude, 10, 18);
-            cxt.fillText(latitude, 10, 33);
-            //render();
-        }
-        //设置TX
-        function onDocumentMouseDown(event) {
-            event.preventDefault();
-            mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
-            raycaster.setFromCamera(mouse, camera);
-            var intersects = raycaster.intersectObjects(objects);
-            if (intersects.length > 0) {
-                var intersect = intersects[0];
-                load3DS(intersect, "tx");
-                scene.remove(rollOverMesh);
-                var x = intersect.point.z;
-                var y =  intersect.point.x;
-                var longitude = x/80*(xmax - xmin) + (xmax + xmin) / 2;
-                var latitude  = y/80*(xmax - xmin) + (ymax + ymin)  / 2;
-                TxDTO = { "type" : "tx","longitude" : longitude , "latitude" : latitude};
-                var str = JSON.stringify(TxDTO);
-                sendMessage(str);
-            }
-
-            orbitControls.enabled = true;
-            document.removeEventListener('mousemove', onDocumentMouseMove, false);
-            document.removeEventListener('mousedown', onDocumentMouseDown, false);
-
-        }
-
         //设置RX
         function onDocumentMouseDown2(event) {
             event.preventDefault();
@@ -1329,7 +1638,8 @@
             var intersects = raycaster.intersectObjects(objects);
             if (intersects.length > 0) {
                 var intersect = intersects[0];
-                load3DS(intersect, "rx");
+                loadFbx(intersect,"rx");
+                // load3DS(intersect, "rx");
                 scene.remove(rollOverMesh);
                 var x = intersect.point.z;
                 var y =  intersect.point.x;
@@ -1460,8 +1770,6 @@
             reader.readAsArrayBuffer(file);
         });
 
-
-
         function parseRoadFile() {
 
             shapefile.open(shpBuffer,dbfBuffer,{ encoding : "GB2312"})
@@ -1511,12 +1819,12 @@
                             features : features,
                             bbox : source.bbox
                         }
-                        if (xmin == undefined){
+                        // if (xmin == undefined){
                             xmin = source.bbox[0];
                             ymin = source.bbox[1];
                             xmax = source.bbox[2];
                             ymax = source.bbox[3];
-                        }
+                        // }
 
                     }).then(function () {
                         drawSenario(senario,"3d");
@@ -1528,9 +1836,156 @@
                 .catch(error => console.error(error.stack));
         }
 
-        
+        function parseDefaultfile(name){
+            var building = "./" + name + "/BUILDING_nanjing.shp";
+            var road = "./" + name + "/R.shp";
+            var roaddbf = "./" + name + "/R.dbf";
+            console.log(building);
+            if(gui.domElement.children[1].childElementCount > 1){
+                var nav = document.getElementById("gui");
+                nav.removeChild(nav.firstElementChild);
+                gui = new dat.GUI();
+                var guiDomElement = gui.domElement;
+                nav.appendChild(guiDomElement);
+
+                gui.add( layers, 'plane' ).onChange( function () {
+                    camera.layers.toggle( 0 );
+                } );
+                senario = {};
+                features = [];
+                roads = [];
+                remove(builidings);
+                remove(roadLines);
+                remove(roadNames);
+                remove(pathLines);
+            }
+
+            shapefile.open(building)
+                .then(source => source.read()
+                    .then(function log(result) {
+                        if (result.done) return;
+                        var feature = {
+                            coordinates : result.value.geometry.coordinates[0],
+                            z : result.value.properties.HEIGHT
+                        }
+                        features.push(feature);
+                        return source.read().then(log);
+
+                    }).then(function () {
+                        senario = {
+                            features : features,
+                            bbox : source.bbox
+                        }
+                        // if (xmin == undefined){
+                            xmin = source.bbox[0];
+                            ymin = source.bbox[1];
+                            xmax = source.bbox[2];
+                            ymax = source.bbox[3];
+                        // }
+
+                    }).then(function () {
+                        drawSenario(senario,"3d");
+                    }).then(function () {
+                        senario.type = "senario";
+                        var str = JSON.stringify(senario);
+                        sendMessage(str);
+                    }))
+                .catch(error => console.error(error.stack));
+
+            shapefile.open(road,roaddbf,{ encoding : "GB2312"})
+                .then(source => source.read()
+                    .then(function log(result) {
+                        if (result.done) return;
+
+                        var road = {
+                            coordinates : result.value.geometry.coordinates,
+                            name : result.value.properties.NAME,
+                            direction : result.value.properties.DIRECTION
+                        }
+                        // console.log(road.name);
+                        // console.log(road.direction)
+                        roads.push(road);
+                        return source.read().then(log);
+                    }).then(function () {
+                        if (xmin == undefined){
+                            xmin = source.bbox[0];
+                            ymin = source.bbox[1];
+                            xmax = source.bbox[2];
+                            ymax = source.bbox[3];
+                        }
+                    }).then(function () {
+                        drawRoad(roads);
+                    }))
+                .catch(error => console.error(error.stack));
+        }
+
+
+        var loader = new THREE.FontLoader();
+
+        function drawFont(text,x,y,direction){
+            loader.load( 'fonts/FZLanTingHeiS-UL-GB_Regular.json', function ( font ) {
+
+                initFont( font,text,x,y,direction );
+
+            } );
+        }
+
+        function initFont( font , text, x, y , direction) {
+
+            // Get text from hash
+
+            var theText = text;
+
+            if (text == undefined){
+                return
+            }
+            var hash = document.location.hash.substr( 1 );
+
+            if ( hash.length !== 0 ) {
+
+                theText = hash;
+
+            }
+
+            var geometry = new THREE.TextGeometry( theText, {
+                font: font,
+                size: 0.5,
+                height: 0,
+                weight: 'bold'
+            });
+
+            geometry.computeBoundingBox();
+
+            var materials = [
+                new THREE.MeshBasicMaterial( { color: 0x000000, overdraw: 0.5 } ),
+                new THREE.MeshBasicMaterial( { color: 0x000000, overdraw: 0.5 } )
+            ];
+
+            var mesh = new THREE.Mesh( geometry, materials );
+
+            mesh.position.x = y;
+            mesh.position.y = 0.1;
+            mesh.position.z = x;
+
+            mesh.rotation.x = Math.PI / 2;
+            mesh.rotation.y = Math.PI ;
+
+            if (direction == "2"){
+                mesh.rotation.z = Math.PI/2 ;
+            }
+            mesh.layers.set(2);
+            mesh.name = Math.random().toString(36).substr(2);
+            roadNames.push(mesh);
+            scene.add( mesh );
+        }
+
+
 
     </script>
+
+
+
+
 </body>
 
 </html>
