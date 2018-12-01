@@ -36,10 +36,9 @@ Q_SIGNALS:
 private Q_SLOTS:
     void onNewConnection();
     void processTextMessage(QString message);
-    void processBinaryMessage(QByteArray message);
     void socketDisconnected();
-    void updateBuilding();
-    void updateRoad();
+//    void updateBuilding();
+//    void updateRoad();
     void updateScene(QJsonObject jsonObject);
     QString VPL();
 private:

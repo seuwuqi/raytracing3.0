@@ -39,7 +39,6 @@ void EchoServer::onNewConnection()
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
 
     connect(pSocket, &QWebSocket::textMessageReceived, this, &EchoServer::processTextMessage);
-    connect(pSocket, &QWebSocket::binaryMessageReceived, this, &EchoServer::processBinaryMessage);
     connect(pSocket, &QWebSocket::disconnected, this, &EchoServer::socketDisconnected);
     qDebug() << "socket connected:";
     m_clients << pSocket;
@@ -54,45 +53,42 @@ void EchoServer::processTextMessage(QString message)
 //        qDebug() << "Message received:" << message;
     if (pClient) {
         if(message == "1"){
-            updateBuilding();
-            QJsonObject qjss=QJsonObject::fromVariantMap(mapMap);
-            QJsonDocument doc(qjss);
-            QString strJson(doc.toJson(QJsonDocument::Compact));
-            pClient->sendTextMessage(strJson);
+//            updateBuilding();
+//            QJsonObject qjss=QJsonObject::fromVariantMap(mapMap);
+//            QJsonDocument doc(qjss);
+//            QString strJson(doc.toJson(QJsonDocument::Compact));
+//            pClient->sendTextMessage(strJson);
 
             //QString bound = '';
         }else if(message == "2"){
 //          射线追踪
-
 //            QString data = rayTracing();
             QString data = VPL();
             pClient->sendTextMessage(data);
         }else if(message == '3'){
 //          更新道路
-            updateRoad();
-            QJsonObject qjss=QJsonObject::fromVariantMap(mapMap);
-            QJsonDocument doc(qjss);
-            QString strJson(doc.toJson(QJsonDocument::Compact));
+//            updateRoad();
+//            QJsonObject qjss=QJsonObject::fromVariantMap(mapMap);
+//            QJsonDocument doc(qjss);
+//            QString strJson(doc.toJson(QJsonDocument::Compact));
             pClient->sendTextMessage(strJson);
         }else if(message == "cordinate"){
-            QMap<QString, QVariant> map;
-            map.insert("xmax",xmax);
-            map.insert("xmin",xmin);
-            map.insert("ymax",ymax);
-            map.insert("ymin",ymin);
-            QJsonObject qjss = QJsonObject::fromVariantMap(map);
-            QJsonDocument doc(qjss);
-            QString strJson(doc.toJson(QJsonDocument::Compact));
-            pClient->sendTextMessage(strJson);
+//            QMap<QString, QVariant> map;
+//            map.insert("xmax",xmax);
+//            map.insert("xmin",xmin);
+//            map.insert("ymax",ymax);
+//            map.insert("ymin",ymin);
+//            QJsonObject qjss = QJsonObject::fromVariantMap(map);
+//            QJsonDocument doc(qjss);
+//            QString strJson(doc.toJson(QJsonDocument::Compact));
+//            pClient->sendTextMessage(strJson);
         }else{//Tx Rx
-
             QJsonDocument jsonDocument = QJsonDocument::fromJson(message.toLocal8Bit().data());
                if(jsonDocument.isNull())
                {
                    qDebug()<< "String NULL"<< message.toLocal8Bit().data();
                }
                QJsonObject jsonObject = jsonDocument.object();
-
                QString type = jsonObject["type"].toString();
                if(type == "tx"){
                    double longitude =  jsonObject["longitude"].toDouble();
@@ -109,12 +105,9 @@ void EchoServer::processTextMessage(QString message)
                    qDebug() << "x:" << x*30 << "y:" << y*30;
                    receivedRx = new Node(x, y);
                }else if(type == "senario"){
-
                     sceneDate = jsonObject;
                     updateScene(sceneDate);
                }
-
-
 
         }
 
@@ -122,19 +115,6 @@ void EchoServer::processTextMessage(QString message)
 }
 //! [processTextMessage]
 
-//! [processBinaryMessage]
-//!
-//!
-void EchoServer::processBinaryMessage(QByteArray message)
-{
-    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    if (m_debug)
-        qDebug() << "Binary Message received:" << message;
-    if (pClient) {
-        pClient->sendBinaryMessage(message);
-    }
-}
-//! [processBinaryMessage]
 
 //! [socketDisconnected]
 void EchoServer::socketDisconnected()
@@ -221,70 +201,80 @@ void EchoServer::updateScene(QJsonObject jsonObject){
         scene->objList.push_back(obj);
     }
 }
-void EchoServer::updateRoad(){
-    mapMap.clear();
-    FilePoint *filePoint = new FilePoint();
-    FileManager *fileManager = new FileManager("./R.shp","./R.dbf");
-    fileManager->readRoadDbf(filePoint);
-    fileManager->readRoadShp(filePoint);
-    qDebug() <<"xmax:"<<filePoint->Xmax;
-    qDebug() <<"xmin"<<filePoint->Xmin;
-    qDebug() <<"ymax"<<filePoint->Ymax;
-    qDebug() <<"ymin"<<filePoint->Ymin;
-    QMap<QString,QVariant> boundMap;
-    filePoint->uniformlize(80,0,xmax - xmin);//(0,1)
-    Scene *scene = new Scene(filePoint->allPointList, filePoint->index);
-    QJsonObject qjs;
-    for(int i = 0; i < scene->objList.size(); i++){
-        QMap<QString,QVariant> myMap;
-        QList<QVariant> posList;
-        for(int j=0;j<scene->objList[i]->pointList.size();j++){
-            QMap<QString,QVariant> tempMap;
-            tempMap.insert(QString("x"),QVariant((scene->objList[i]->pointList[j]->x )));
-            tempMap.insert(QString("y"),QVariant((scene->objList[i]->pointList[j]->y )));
+
+
+
+
+
+
+//void EchoServer::updateRoad(){
+//    mapMap.clear();
+//    FilePoint *filePoint = new FilePoint();
+//    FileManager *fileManager = new FileManager("./R.shp","./R.dbf");
+//    fileManager->readRoadDbf(filePoint);
+//    fileManager->readRoadShp(filePoint);
+//    qDebug() <<"xmax:"<<filePoint->Xmax;
+//    qDebug() <<"xmin"<<filePoint->Xmin;
+//    qDebug() <<"ymax"<<filePoint->Ymax;
+//    qDebug() <<"ymin"<<filePoint->Ymin;
+//    QMap<QString,QVariant> boundMap;
+//    filePoint->uniformlize(80,0,xmax - xmin);//(0,1)
+//    Scene *scene = new Scene(filePoint->allPointList, filePoint->index);
+//    QJsonObject qjs;
+//    for(int i = 0; i < scene->objList.size(); i++){
+//        QMap<QString,QVariant> myMap;
+//        QList<QVariant> posList;
+//        for(int j=0;j<scene->objList[i]->pointList.size();j++){
+//            QMap<QString,QVariant> tempMap;
+//            tempMap.insert(QString("x"),QVariant((scene->objList[i]->pointList[j]->x )));
+//            tempMap.insert(QString("y"),QVariant((scene->objList[i]->pointList[j]->y )));
 //            tempMap.insert(QString("x"),QVariant((scene->objList[i]->pointList[j]->x - 0.5)*80));
-//            tempMap.insert(QString("y"),QVariant((scene->objList[i]->pointList[j]->y - 0.5)*80));
-            tempMap.insert(QString("z"),QVariant(0) );
-            posList.append(QVariant(tempMap));
-        }
+//           tempMap.insert(QString("y"),QVariant((scene->objList[i]->pointList[j]->y - 0.5)*80));
+//            tempMap.insert(QString("z"),QVariant(0) );
+//            posList.append(QVariant(tempMap));
+//        }
 
-        mapMap.insert(QString::number(i,10),QVariant(posList));
-    }
-}
-void EchoServer::updateBuilding(){
-    mapMap.clear();
-    FilePoint *filePoint = new FilePoint();
-    FileManager *fileManager = new FileManager("E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.shp",
-                                               "E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.dbf");
-    fileManager->readDbfFile(filePoint);
-    fileManager->readShpFile(filePoint);
-    qDebug() <<"xmax:"<<filePoint->Xmax;
-    qDebug() <<"xmin"<<filePoint->Xmin;
-    qDebug() <<"ymax"<<filePoint->Ymax;
-    qDebug() <<"ymin"<<filePoint->Ymin;
-    QMap<QString,QVariant> boundMap;
-    xmax =filePoint->Xmax;
-    xmin =filePoint->Xmin;
-    ymax =filePoint->Ymax;
-    ymin =filePoint->Ymin;
-    filePoint->uniformlize(80,50,xmax - xmin);//(0,1)
-    Scene *scene = new Scene(filePoint->allPointList, filePoint->index);
-    QJsonObject qjs;
-    for(int i = 0; i < scene->objList.size(); i++){
-        QMap<QString,QVariant> myMap;
-        QList<QVariant> posList;
-        for(int j=0;j<scene->objList[i]->pointList.size();j++){
-            QMap<QString,QVariant> tempMap;
-            tempMap.insert(QString("x"),QVariant((scene->objList[i]->pointList[j]->x )));
-            tempMap.insert(QString("y"),QVariant((scene->objList[i]->pointList[j]->y)));
-            tempMap.insert(QString("z"),QVariant(scene->objList[i]->pointList[j]->z ));
-//            tempMap.insert(QString("x"),QVariant((scene->objList[i]->pointList[j]->x - 0.5)*80));
-//            tempMap.insert(QString("y"),QVariant((scene->objList[i]->pointList[j]->y - 0.5)*80));
-//            tempMap.insert(QString("z"),QVariant(scene->objList[i]->pointList[j]->z *10) );
-            posList.append(QVariant(tempMap));
-        }
+//        mapMap.insert(QString::number(i,10),QVariant(posList));
+//    }
+//}
 
-        mapMap.insert(QString::number(i,10),QVariant(posList));
-    }
 
-}
+
+
+//void EchoServer::updateBuilding(){
+//    mapMap.clear();
+//    FilePoint *filePoint = new FilePoint();
+//    FileManager *fileManager = new FileManager("E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.shp",
+//                                               "E:/QT5_11_1/raytracing1.1/rayTracing1.1/RayTracing/BUILDING_nanjing.dbf");
+//    fileManager->readDbfFile(filePoint);
+//    fileManager->readShpFile(filePoint);
+//    qDebug() <<"xmax:"<<filePoint->Xmax;
+//    qDebug() <<"xmin"<<filePoint->Xmin;
+//    qDebug() <<"ymax"<<filePoint->Ymax;
+//    qDebug() <<"ymin"<<filePoint->Ymin;
+//    QMap<QString,QVariant> boundMap;
+//    xmax =filePoint->Xmax;
+//    xmin =filePoint->Xmin;
+//    ymax =filePoint->Ymax;
+//    ymin =filePoint->Ymin;
+//    filePoint->uniformlize(80,50,xmax - xmin);//(0,1)
+//    Scene *scene = new Scene(filePoint->allPointList, filePoint->index);
+//    QJsonObject qjs;
+//    for(int i = 0; i < scene->objList.size(); i++){
+//        QMap<QString,QVariant> myMap;
+//        QList<QVariant> posList;
+//        for(int j=0;j<scene->objList[i]->pointList.size();j++){
+//            QMap<QString,QVariant> tempMap;
+//            tempMap.insert(QString("x"),QVariant((scene->objList[i]->pointList[j]->x )));
+//            tempMap.insert(QString("y"),QVariant((scene->objList[i]->pointList[j]->y)));
+//            tempMap.insert(QString("z"),QVariant(scene->objList[i]->pointList[j]->z ));
+//           tempMap.insert(QString("x"),QVariant((scene->objList[i]->pointList[j]->x - 0.5)*80));
+//           tempMap.insert(QString("y"),QVariant((scene->objList[i]->pointList[j]->y - 0.5)*80));
+//          tempMap.insert(QString("z"),QVariant(scene->objList[i]->pointList[j]->z *10) );
+//            posList.append(QVariant(tempMap));
+//        }
+
+//        mapMap.insert(QString::number(i,10),QVariant(posList));
+//    }
+
+//}
