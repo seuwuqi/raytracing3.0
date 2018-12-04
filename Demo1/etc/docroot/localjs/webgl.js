@@ -416,8 +416,8 @@ function drawRoad(roads){
             roadLines.push(line);
         }
         if(name != roadName){
-            drawText(CNfont,name,x,y,direction);
-            roadName = name;
+            // drawText(CNfont,name,x,y,direction);
+            // roadName = name;
         }
     }
     camera.layers.enable( 2 );
