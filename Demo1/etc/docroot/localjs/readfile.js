@@ -195,13 +195,13 @@ function parseDefaultfile(name){
                     features : features,
                     bbox : source.bbox
                 }
-                // if (xmin == undefined){
                 xmin = source.bbox[0];
                 ymin = source.bbox[1];
                 xmax = source.bbox[2];
                 ymax = source.bbox[3];
-                // }
-
+                dividend = (xmax - xmin) > (ymax - ymin) ? (xmax - xmin) : (ymax - ymin);
+                mapLenth = GetDistance(xmin,ymin,xmin,ymax);
+                mapwidth = GetDistance(xmin,ymin,xmax,ymin);
             }).then(function () {
                 drawSenario(senario,"3d");
             }).then(function () {
@@ -231,6 +231,9 @@ function parseDefaultfile(name){
                     ymin = source.bbox[1];
                     xmax = source.bbox[2];
                     ymax = source.bbox[3];
+                    dividend = (xmax - xmin) > (ymax - ymin) ? (xmax - xmin) : (ymax - ymin);
+                    mapLenth = GetDistance(xmin,ymin,xmin,ymax);
+                    mapwidth = GetDistance(xmin,ymin,xmax,ymin);
                 }
             }).then(function () {
                 drawRoad(roads);

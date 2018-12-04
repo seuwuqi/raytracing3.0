@@ -2,12 +2,14 @@
 #include <vector>
 #include "point.h"
 #include "edge.h"
+#include "QString"
 using namespace std;
 class Object
 {
 public:
 	vector<Point*> pointList;
 	vector<Edge*> edgeList;
+    QString type;
 	double z;
 	int index;
 public:

@@ -19,10 +19,17 @@ var vehicles = [];
 var pathLines = [];
 var roadLines = [];
 var roadNames = [];
+var rollOverLines = [];
 var xmax , xmin , ymax , ymin ;
+//被除数
+var dividend;
+
+var mapLenth;
+var mapwidth;
+
 var TxDTO;
 var RxDTO;
-var vehicleDTO;
+
 
 var lut;
 
@@ -61,14 +68,16 @@ function processVehicleForm() {
     setVehicle(speed,type,isDynamic);
 }
 
+
+
+
+
 function setVehicle(speed,type,dynamic){
-    var vehicle = {
-        speed : speed,
-        type : type,
-        dynamic : dynamic
-    }
-    vehicles.push(vehicle);
-    orbitControls.enabled = false;
+
+    vehicleDTO.type = "vehicle";
+    vehicleDTO.vehicleType = type;
+    vehicleDTO.speed = speed;
+    vehicleDTO.dynamic = dynamic;
     rollOverGeo = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
     rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true });
     rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
@@ -85,6 +94,9 @@ function setVehicle(speed,type,dynamic){
     rollOverLine.computeLineDistances();
     rollOverLine.scale.set( 1, 1, 1 );
     scene.add( rollOverLine );
+    rollOverLine.name = Math.random().toString(36).substr(2);
+    rollOverLines.push(rollOverLine);
+
 
     scene.add(rollOverMesh);
     raycaster = new THREE.Raycaster();
@@ -92,19 +104,78 @@ function setVehicle(speed,type,dynamic){
     vehicleType = type;
     dynamicMod = dynamic;
     count = 0;
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
-    document.addEventListener('mousedown', onDocumentMouseDown, false);
+    startListen();
 
 }
 
 
 var vehicleType;
-var vehicleSpeed;
 var dynamicMod;
 var count;
 var startPoint;
 var distance;
+var vehicleDTO = {};
 
+function startListen() {
+    orbitControls.enabled = false;
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
+    document.addEventListener('mousedown', onDocumentMouseDown, false);
+}
+function stopListen() {
+    vehicleType = undefined;
+    dynamicMod = undefined;
+    count = 0;
+    startPoint = undefined;
+    distance = 0;
+    vehicleDTO = {};
+    orbitControls.enabled = true;
+    document.removeEventListener('mousemove', onDocumentMouseMove, false);
+    document.removeEventListener('mousedown', onDocumentMouseDown, false);
+
+}
+
+function drawTriangle(intersect) {
+    var triangleShape = new THREE.Shape();
+    triangleShape.moveTo( 0, 0 );
+    triangleShape.lineTo( 0.5, 1 );
+    triangleShape.lineTo( 1, 0.5);
+    triangleShape.lineTo( 0, 0 ); // close path
+    var geometry = new THREE.ShapeBufferGeometry( triangleShape );
+    var mesh = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( {side: THREE.DoubleSide, color : "#000000"} ) );
+
+    console.log(intersect.point.x);
+    console.log(startPoint.y);
+    console.log(intersect.point.z);
+    console.log(startPoint.x);
+    var angle = Math.atan((intersect.point.x - startPoint.y)
+        / (intersect.point.z - startPoint.x));
+    if(intersect.point.z - startPoint.x < 0){
+        angle += Math.PI;
+    }
+    console.log(angle);
+    mesh.position.copy(intersect.point);
+    mesh.position.y = 0.1;
+    mesh.rotation.set( Math.PI / 2, 0, Math.PI * 5 / 4 );
+    mesh.rotateZ(2 * Math.PI - angle);
+    mesh.scale.set( 2, 2, 2 );
+    mesh.name = Math.random().toString(36).substr(2);
+    scene.add(mesh);
+    triangle.push(mesh);
+}
+
+function coordinateTransX(x) {
+    return (x - (xmax + xmin)/ 2)/(dividend) * 80
+}
+function coordinateTransY(y) {
+    return (y - (ymax + ymin)/ 2)/(dividend) * 80
+}
+
+function xToCoordinate(x) {
+    return  x/80*(dividend) + (xmax + xmin) / 2;
+}
+function yToCoordinate(y) {
+    return  y/80*(dividend) + (ymax + ymin)  / 2;
+}
 function onDocumentMouseMove(event) {
     event.preventDefault();
     mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
@@ -122,9 +193,8 @@ function onDocumentMouseMove(event) {
     cxt.clearRect(0, 0, 200, 40);
     var x = intersect.point.z;
     var y = intersect.point.x;
-    var longitude = x / 80 * (xmax - xmin) + (xmax + xmin) / 2;
-    var latitude = y / 80 * (xmax - xmin) + (ymax + ymin) / 2;
-
+    var longitude = xToCoordinate(x);
+    var latitude = yToCoordinate(y);
     cxt.fillText(longitude, 10, 18);
     cxt.fillText(latitude, 10, 33);
 
@@ -141,6 +211,12 @@ function onDocumentMouseMove(event) {
 //设置TX
 function onDocumentMouseDown(event) {
     event.preventDefault();
+    console.log(event.button);
+    if (event.button == 2){
+        scene.remove(rollOverMesh);
+        stopListen();
+        return;
+    }
     mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(mouse, camera);
     var intersects = raycaster.intersectObjects(objects);
@@ -150,69 +226,57 @@ function onDocumentMouseDown(event) {
         scene.remove(rollOverMesh);
         var x = intersect.point.z;
         var y =  intersect.point.x;
-        var longitude = x/80*(xmax - xmin) + (xmax + xmin) / 2;
-        var latitude  = y/80*(xmax - xmin) + (ymax + ymin)  / 2;
-        if(count == 2){//动态模式
-            distance = GetDistance(longitude, latitude, startPoint.longitude, startPoint.latitude);
-            console.log(distance);
-            drawText(ENfont,distance + "m",(x + startPoint.x) / 2,(y + startPoint.y) / 2, 2);
-            var triangleShape = new THREE.Shape();
-            triangleShape.moveTo( 0, 0 );
-            triangleShape.lineTo( 0.5, 1 );
-            triangleShape.lineTo( 1, 0.5);
-            triangleShape.lineTo( 0, 0 ); // close path
-            var geometry = new THREE.ShapeBufferGeometry( triangleShape );
-            var mesh = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( {side: THREE.DoubleSide, color : "#000000"} ) );
+        var longitude = xToCoordinate(x);
+        var latitude  = yToCoordinate(y);
 
-            console.log(intersect.point.x);
-            console.log(startPoint.y);
-            console.log(intersect.point.z);
-            console.log(startPoint.x);
-            var angle = Math.atan((intersect.point.x - startPoint.y)
-                / (intersect.point.z - startPoint.x));
-            if(intersect.point.z - startPoint.x < 0){
-                angle += Math.PI;
-            }
-            console.log(angle);
-            mesh.position.copy(intersect.point);
-            mesh.position.y = 0.1;
-            mesh.rotation.set( Math.PI / 2, 0, Math.PI * 5 / 4 );
-            mesh.rotateZ(2 * Math.PI - angle);
-            mesh.scale.set( 2, 2, 2 );
-            mesh.name = Math.random().toString(36).substr(2);
-            scene.add(mesh);
-            triangle.push(mesh);
-
-        }else{
+        if (dynamicMod == undefined || dynamicMod == false){
             if (vehicleType == "other"){
                 loadFbx(intersect,vehicleType)
             } else {
                 load3DS(intersect, vehicleType);
             }
+            vehicleDTO.location1 = [longitude, latitude];
+            console.log(vehicleDTO);
+            var str = JSON.stringify(vehicleDTO);
+            sendMessage(str);
+            stopListen();
+
+        }else {
+            if (count == 1){
+                if (vehicleType == "other"){
+                    loadFbx(intersect,vehicleType)
+                } else {
+                    load3DS(intersect, vehicleType);
+                }
+                startPoint = {x : x, y : y, longitude : longitude, latitude : latitude};
+                vehicleDTO.location1 = [longitude, latitude];
+            }else {
+                distance = GetDistance(longitude, latitude, startPoint.longitude, startPoint.latitude);
+                console.log(distance);
+                drawText(ENfont,distance + "m",(x + startPoint.x) / 2,(y + startPoint.y) / 2, 2);
+                drawTriangle(intersect);
+                vehicleDTO.location2 = [longitude,latitude];
+                vehicleDTO.distance = distance;
+                console.log(vehicleDTO);
+                var str = JSON.stringify(vehicleDTO);
+                sendMessage(str);
+                stopListen();
+            }
+
         }
-
-
-        vehicleDTO = { "speed" : vehicleSpeed, "type" : vehicleType,"longitude" : longitude , "latitude" : latitude};
-
-        var str = JSON.stringify(vehicleDTO);
-        sendMessage(str);
-
     }
-    if (dynamicMod == undefined || dynamicMod == false || count == 2){
-        count = 0;
-        startPoint = undefined;
-        orbitControls.enabled = true;
-        dynamicMod = false;
-        document.removeEventListener('mousemove', onDocumentMouseMove, false);
-        document.removeEventListener('mousedown', onDocumentMouseDown, false);
-    }else{
-        startPoint = {x : x, y : y, longitude : longitude, latitude : latitude};
-    }
+
 }
 
+function GetDistance2(x1,y1,x2,y2) {
+    var lng1 = xToCoordinate(x1);
+    var lat1 = yToCoordinate(y1);
+    var lng2 = xToCoordinate(x2);
+    var lat2 = yToCoordinate(y2);
+    return GetDistance(lng1,lat1,lng2,lat2);
+}
 
-function GetDistance( lng1,lat1, lng2, lat2)
-{
+function GetDistance( lng1,lat1, lng2, lat2) {
     var radLat1 = rad(lat1);
     var radLat2 = rad(lat2);
     var a = radLat1 - radLat2;
@@ -242,14 +306,12 @@ function drawSenario(senario,mod) {
         for (var j = 0; j < coords.length; j ++) {
             var x = coords[j][0];
             var y = coords[j][1];
-            pointXX.push(  (x - (xmax + xmin)/ 2)/(xmax - xmin) * 80 );
-            pointYY.push(  (y - (ymax + ymin)/ 2)/(xmax - xmin) * 80 );
-            // pointXX.push(  (x - xmin)/(xmax - xmin) * 80 );
-            // pointYY.push(  (y - ymin)/(xmax - xmin) * 80 );
+            pointXX.push(  coordinateTransX(x) );
+            pointYY.push(  coordinateTransY(y) );
         }
         pointX.push(pointXX);
         pointY.push(pointYY);
-        pointZ.push(  (senario.features[i].z) / 80 *  (118.813658- 118.728997)/( xmax - xmin));
+        pointZ.push(  (senario.features[i].z) / 80 *  (118.813658- 118.728997)/( dividend));
 
     }
     layers.building = true;
@@ -273,6 +335,9 @@ function setTx(type) {
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
     vehicleType = type;
+    vehicleDTO.type = "vehicle";
+    vehicleDTO.vehicleType = type;
+    vehicleDTO.dynamic = false;
     document.addEventListener('mousemove', onDocumentMouseMove, false);
     document.addEventListener('mousedown', onDocumentMouseDown, false);
 }
@@ -300,7 +365,7 @@ function reset() {
     remove(pathLines);
     remove(triangle);
     remove(distanceText);
-    scene.remove(rollOverLine);
+    remove(rollOverLines);
     container2.parentNode.removeChild(container2);
 }
 
@@ -329,18 +394,18 @@ function drawRoad(roads){
         // console.log(mid);
         var x = pm[0];
         var y = pm[1];
-        x = (x- (xmax + xmin)/ 2)/(xmax - xmin) * 80;
-        y = (y- (ymax + ymin)/ 2)/(xmax - xmin) * 80;
+        x = coordinateTransX(x);
+        y = coordinateTransY(y);
         // console.log(x);
         // console.log(y);
         for(let j = 0; j < coordinates.length - 1; j++){
             var p1 = coordinates[j], p2 = coordinates[j+1];
-            var x1 = (p1[0] - (xmax + xmin)/ 2)/(xmax - xmin) * 80;
-            var y1 = (p1[1] - (ymax + ymin)/ 2)/(xmax - xmin) * 80;
-            var x2 = (p2[0] - (xmax + xmin)/ 2)/(xmax - xmin) * 80;
-            var y2 = (p2[1] - (ymax + ymin)/ 2)/(xmax - xmin) * 80;
-            var q1 = new THREE.Vector3(y1, 0, x1);
-            var q2 = new THREE.Vector3(y2, 0, x2);
+            var x1 = coordinateTransX(p1[0]);
+            var y1 = coordinateTransY(p1[1]);
+            var x2 = coordinateTransX(p2[0]);
+            var y2 = coordinateTransY(p2[1]);
+            var q1 = new THREE.Vector3(y1, 0.1, x1);
+            var q2 = new THREE.Vector3(y2, 0.1, x2);
             geometry.vertices.push(q1);
             geometry.vertices.push(q2);
             geometry.colors.push( color1, color2 );
@@ -427,12 +492,12 @@ function drawPath(data) {
         var color = lut.getColor( path.pathloss );
         console.log(color);
         for (let i = 0; i < nodeList.length; i++) {
-            nodeList[i].x = (nodeList[i].x - (xmax + xmin) / 2)/(xmax - xmin) *80;
-            nodeList[i].y = (nodeList[i].y - (ymax + ymin)/ 2)/(xmax - xmin) * 80;
+            nodeList[i].x = coordinateTransX(nodeList[i].x);
+            nodeList[i].y = coordinateTransY(nodeList[i].y);
         }
         for (let i = 0; i < nodeList.length - 1; i++) {
-            var p1 = new THREE.Vector3(nodeList[i].y, 0.5, nodeList[i].x);
-            var p2 = new THREE.Vector3(nodeList[i + 1].y, 0.5, nodeList[i + 1].x);
+            var p1 = new THREE.Vector3(nodeList[i].y, 0.3, nodeList[i].x);
+            var p2 = new THREE.Vector3(nodeList[i + 1].y, 0.3, nodeList[i + 1].x);
             geometry.vertices.push(p1);
             geometry.vertices.push(p2);
             geometry.colors.push(color,color);
@@ -449,10 +514,54 @@ function drawPath(data) {
     } );
 
 }
-//
+
+
 
 // 3Dmodel
 function loadFbx(intersect, type){
+    console.log("ok");
+    console.log(intersect.point);
+    console.log(type);
+    var x = intersect.point.z;
+    var y = intersect.point.x;
+    var height = 0.6;
+    var length = 0.5;
+    var width = 2.1;
+    var point1 = {},point2 = {},point3 = {},point4 = {},point5 = {};
+    var positions = [];
+    var x1 = x + length/2;
+    var y1 = y + width/2;
+
+    var x2 = x - length/2;
+    var y2 = y + width/2;
+
+
+    var x3 = x - length/2;
+    var y3 = y - width/2;
+
+
+    var x4 = x + length/2;
+    var y4 = y - width/2;
+
+
+    point1.x = xToCoordinate(x1);
+    point2.x = xToCoordinate(x2);
+    point3.x = xToCoordinate(x3);
+    point4.x = xToCoordinate(x4);
+    point5.x = xToCoordinate(x1);
+
+    point1.y = yToCoordinate(y1);
+    point2.y = yToCoordinate(y2);
+    point3.y = yToCoordinate(y3);
+    point4.y = yToCoordinate(y4);
+    point5.y = yToCoordinate(y1);
+
+
+
+    vehicleDTO.bbox = [];
+    vehicleDTO.bbox.push(point1,point2,point3,point4,point5);
+    vehicleDTO.height = height;
+
     var fbxloader = new THREE.FBXLoader();
     fbxloader.load( 'bus/bus.fbx', function ( object ) {
 
@@ -462,17 +571,17 @@ function loadFbx(intersect, type){
                 child.receiveShadow = true;
             }
         } );
-        object.scale.set(0.0004, 0.0004, 0.0004);
+        object.scale.set(0.0002, 0.0002, 0.0002);
         object.position.copy(intersect.point);
-        object.position.y = 0.6;
+        object.position.y = 0.3;
         // object.rotateX(Math.PI * 6 / 4);
-        object.rotateY(camera.rotation._z);
-        object.rotateY(Math.PI);
+        // object.rotateY(camera.rotation._z);
+        object.rotateY(Math.PI/2);
         object.name = Math.random().toString(36).substr(2);
         scene.add( object );
         if (type == "tx") {
             tx.push(object);
-        } else if (type == "rx") {
+        } else {
             rx.push(object);
         }
     } );
@@ -488,7 +597,7 @@ function load3DS(intersect, type) {
                 //child.material.normalMap = normal;
             }
         });
-        object.scale.set(0.002, 0.002, 0.002);
+        object.scale.set(0.001, 0.001, 0.001);
         object.position.copy(intersect.point);
         object.rotateX(Math.PI * 6 / 4);
         object.rotateZ(camera.rotation._z);
@@ -613,7 +722,7 @@ function main() {
 }
 
 function plane() {
-    var geometry = new THREE.PlaneBufferGeometry(120, 120);
+    var geometry = new THREE.PlaneBufferGeometry(100, 100);
     geometry.rotateX(- Math.PI/2 );
     var plane = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: "#88918c", visible: true }));
     plane.layers.set(0);
@@ -624,16 +733,41 @@ function plane() {
     objects.push(plane);
 }
 
-//创建一个立方体
-function cube() {
-    //THREE.CubeGeometry(width,height,depth,widthSegments,heightSegments, depthSegments)
-    var cubeGeo = new THREE.CubeGeometry(20, 20, 10, 15, 5, 5); //创建立方体
+
+
+// cube2();
+var cubeMesh2;
+function cube2(){
+    var height = 0.6;
+    var length = 0.5;
+    var width = 2.1;
+    var cubeGeo = new THREE.CubeGeometry(length, height, width, 1, 1, 1); //创建立方体
     var cubeMat = new THREE.MeshLambertMaterial({ //创建材料
         color: 0x003300,
-        wireframe: false
+        wireframe: true
+    });
+    cubeMesh2 = new THREE.Mesh(cubeGeo, cubeMat); //创建立方体网格模型
+    cubeMesh2.position.y = height / 2;
+
+    scene.add(cubeMesh2); //将立方体添加到场景中
+}
+
+//创建一个立方体
+function cube(point) {
+    //THREE.CubeGeometry(width,height,depth,widthSegments,heightSegments, depthSegments)
+    var height = 0.6;
+    var lenght = 2.1;
+    var width = 0.5;
+    var cubeGeo = new THREE.CubeGeometry(lenght, height, width, 1, 1, 1); //创建立方体
+    var cubeMat = new THREE.MeshLambertMaterial({ //创建材料
+        color: 0x003300,
+        wireframe: true
     });
     cubeMesh = new THREE.Mesh(cubeGeo, cubeMat); //创建立方体网格模型
-    cubeMesh.position.set(20, 10, 0); //设置立方体的坐标 几何中心
+    // cubeMesh.rotateY(camera.rotation._z);
+    // cubeMesh.rotateY(Math.PI);
+    cubeMesh.position.copy(point); //设置立方体的坐标 几何中心
+    cubeMesh.position.y = height / 2;
     scene.add(cubeMesh); //将立方体添加到场景中
 }
 //创建一个球
@@ -706,12 +840,31 @@ function render() {
     renderer.render(scene, camera);
 }
 
+//画线段
+function drawline(positions) {
+    var geometry = new THREE.LineGeometry();
+    geometry.setPositions( positions );
+    // geometry.setColors( colors );
+    var matLine = new THREE.LineMaterial( {
+        color: "#aa8f13",
+        linewidth: 0.002,
+        // vertexColors: THREE.VertexColors,
+        dashed: false
+    } );
+    line = new THREE.Line2( geometry, matLine );
+    line.computeLineDistances();
+    line.scale.set( 1, 1, 1 );
+    scene.add( line );
+}
 
 
-
-
-
-
+var positions = [];
+positions.push(-40,0.5,-40);
+positions.push(40,0.5,-40);
+positions.push(40,0.5,40);
+positions.push(-40,0.5,40);
+positions.push(-40,0.5,-40);
+drawline(positions);
 
 
 
@@ -888,21 +1041,7 @@ function render() {
 // }
 
 //画线段
-// function drawline(positions) {
-//     var geometry = new THREE.LineGeometry();
-//     geometry.setPositions( positions );
-//     // geometry.setColors( colors );
-//     var matLine = new THREE.LineMaterial( {
-//         color: "#222221",
-//         linewidth: 0.002,
-//         // vertexColors: THREE.VertexColors,
-//         dashed: false
-//     } );
-//     line = new THREE.Line2( geometry, matLine );
-//     line.computeLineDistances();
-//     line.scale.set( 1, 1, 1 );
-//     scene.add( line );
-// }
+
 
 
 //主函数

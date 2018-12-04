@@ -40,6 +40,7 @@ private Q_SLOTS:
 //    void updateBuilding();
 //    void updateRoad();
     void updateScene(QJsonObject jsonObject);
+    void updateVehicle(QJsonObject jsonObject);
     QString VPL();
 private:
     QWebSocketServer *m_pWebSocketServer;
@@ -47,6 +48,8 @@ private:
     bool m_debug;
     Node* receivedTx;
     Node* receivedRx;
+    vector<Object*> carList;
+    bool vehicleAdded = false;
 };
 
 #endif //ECHOSERVER_H

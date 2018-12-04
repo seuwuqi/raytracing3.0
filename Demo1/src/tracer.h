@@ -24,6 +24,7 @@ public:
     vector<Path*> allPath;
     vector<Node*> nodeList;
     double distanceBetweenTxRx;
+    vector<Object*> vehicles;
 private:
 
 
@@ -40,6 +41,15 @@ public:
         distanceBetweenTxRx = distance(Tx->x, Tx->y, mesh->Rx->x, mesh->Rx->y);
         qDebug() << "distanceBetweenTxRx" << distanceBetweenTxRx;
     }
+
+    Tracer(Mesh*mesh, Node* Tx, vector<Object*> vehicles){
+        this->mesh = mesh;
+        this->tx = Tx;
+        distanceBetweenTxRx = distance(Tx->x, Tx->y, mesh->Rx->x, mesh->Rx->y);
+        this->vehicles = vehicles;
+        qDebug() << "distanceBetweenTxRx" << distanceBetweenTxRx;
+    }
+
     ~Tracer(){
 
     }
@@ -302,6 +312,44 @@ public:
 
     }
 
+
+    Point* Intersertion_segment(Point* p1, Point* p2, Point* p3, Point* p4){
+        double s1 = direction(p1,p2,p3);
+        double s2 = direction(p1,p2,p4);
+        double s3 = direction(p3,p4,p1);
+        double s4 = direction(p3,p4,p2);
+        if(s1 == 0){
+            return new Point(p3->x,p3->y);
+        }else if(s2 == 0){
+            return new Point(p4->x, p4->y);
+        }else if(s1 * s2 < 0 && s3 * s4 < 0){
+            // p1p2  p3p4
+            double m1 = p2->x - p1->x;
+            double n1 = p2->y - p1->y;
+            double m2 = p4->x - p3->x;
+            double n2 = p4->y - p3->y;
+//                qDebug() << "("<<m1<<","<<n1<<")";
+//                qDebug() << "("<<m2<<","<<n2<<")";
+            double A = n1;
+            double B = -m1;
+            double C = n2;
+            double D = -m2;
+            double Beta1 = n1*p1->x - m1*p1->y;
+            double Beta2 = n2*p3->x - m2*p3->y;
+            // xj = Mj / M
+            double M = A*D - B*C;
+            double M1 = Beta1*D - Beta2*B;
+            double M2 = A*Beta2 - C*Beta1;
+            double x = M1 / M;
+            double y = M2 / M;
+//                qDebug() << x <<"," << y;
+            return new Point(x, y);
+        }else{
+            return nullptr;
+        }
+
+
+    }
     Point* Intersection(Point* p1, Point* p2, Point* p3, Point* p4){
             double s1 = direction(p1,p2,p3);
 //            qDebug() << s1;
@@ -404,6 +452,29 @@ public:
             allPath.push_back(path);
             nodeList.pop_back();
         }
+
+    }
+
+    void processLos(){
+        vector<Node*> line;
+        vector<Node*> left;
+        vector<Node*> right;
+        nodeList.push_back(tx);
+
+        if(vehicles.size() > 0){
+            Object* vehicle = vehicles[0];
+            vector<Edge*> edges = vehicle->edgeList;
+            for(int i = 0; i < edges.size(); i++){
+                Edge* edge = edges[i];
+                Point* intersetPoint = Intersertion_segment(tx, mesh->Rx, edge->startPoint, edge->endPoint);
+                if(intersetPoint != nullptr){
+                    double D = distance(tx->x, tx->y, intersetPoint->x, intersetPoint->y);
+
+                }
+            }
+        }
+
+
 
     }
 

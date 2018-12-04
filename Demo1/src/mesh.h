@@ -7,6 +7,7 @@
 #include "scene.h"
 #include<iostream>
 #include<QDebug>
+#include <QString>
 using namespace std;
 /************************************************************************/
 /* 网格类
@@ -60,6 +61,7 @@ public:
         qDebug()<<"..";
         for (int i = 0; i < objArr.size(); i++){//遍历所有的建筑
             Object* obj = objArr[i];
+            QString type = obj->type;
             obj->scale(size);
             //cout << "************" << obj.z;
             for(int j = 0; j < obj->edgeList.size(); j++){//遍历一个建筑的所有边

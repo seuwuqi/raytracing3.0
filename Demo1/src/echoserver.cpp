@@ -71,7 +71,7 @@ void EchoServer::processTextMessage(QString message)
 //            QJsonObject qjss=QJsonObject::fromVariantMap(mapMap);
 //            QJsonDocument doc(qjss);
 //            QString strJson(doc.toJson(QJsonDocument::Compact));
-            pClient->sendTextMessage(strJson);
+//            pClient->sendTextMessage(strJson);
         }else if(message == "cordinate"){
 //            QMap<QString, QVariant> map;
 //            map.insert("xmax",xmax);
@@ -82,7 +82,7 @@ void EchoServer::processTextMessage(QString message)
 //            QJsonDocument doc(qjss);
 //            QString strJson(doc.toJson(QJsonDocument::Compact));
 //            pClient->sendTextMessage(strJson);
-        }else{//Tx Rx
+        }else{//
             QJsonDocument jsonDocument = QJsonDocument::fromJson(message.toLocal8Bit().data());
                if(jsonDocument.isNull())
                {
@@ -90,27 +90,15 @@ void EchoServer::processTextMessage(QString message)
                }
                QJsonObject jsonObject = jsonDocument.object();
                QString type = jsonObject["type"].toString();
-               if(type == "tx"){
-                   double longitude =  jsonObject["longitude"].toDouble();
-                   double latitude=  jsonObject["latitude"].toDouble();
-                   double x = (longitude - xmin)/(factor);
-                   double y = (latitude - ymin)/(factor);
-                   qDebug() << "x:" << x*30 << "y:" << y*30;
-                   receivedTx = new Node(x,y);
-               }else if(type == "rx"){
-                   double longitude =  jsonObject["longitude"].toDouble();
-                   double latitude=  jsonObject["latitude"].toDouble();
-                   double x = (longitude - xmin)/(factor);
-                   double y = (latitude - ymin)/(factor);
-                   qDebug() << "x:" << x*30 << "y:" << y*30;
-                   receivedRx = new Node(x, y);
-               }else if(type == "senario"){
+               if(type == "vehicle"){
+                   qDebug()<< jsonObject;
+                   updateVehicle(jsonObject);
+               }
+               else if(type == "senario"){
                     sceneDate = jsonObject;
                     updateScene(sceneDate);
                }
-
         }
-
     }
 }
 //! [processTextMessage]
@@ -129,7 +117,6 @@ void EchoServer::socketDisconnected()
 }
 //! [socketDisconnected]
 
-
 QString EchoServer::VPL(){
     updateScene(sceneDate);
     qDebug() << "scene size : "<<scene->objList.size();
@@ -138,8 +125,12 @@ QString EchoServer::VPL(){
     Node* source = new Node(receivedTx->x * mesh->size, receivedTx->y * mesh->size, 0);
     source->type = NodeType::Tx;
 //    射线追踪器
-    Tracer*  tracer = new Tracer(mesh,source);
+    Tracer*  tracer = new Tracer(mesh,source,carList);
     tracer->verticalPlane(source);
+    if(vehicleAdded){
+        carList.pop_back();
+        vehicleAdded = false;
+    }
     qDebug()<<tracer->allPath.size()<<" paths has been accepted";
 //    QMap<QString,QVariant> data;
     QJsonObject json;
@@ -167,7 +158,6 @@ QString EchoServer::VPL(){
     return strJson;
 }
 
-
 void EchoServer::updateScene(QJsonObject jsonObject){
     QJsonArray features = jsonObject["features"].toArray();
     QJsonArray bbox = jsonObject["bbox"].toArray();
@@ -190,20 +180,86 @@ void EchoServer::updateScene(QJsonObject jsonObject){
             double y = coord.toArray()[1].toDouble();
             x = (x - xmin) / factor;
             y = (y - ymin) / factor;
-//            qDebug() << "x:" << x << "y:" << y << "z:" << z;
             obj->pointList.push_back(new Point(x, y ,z ));
 
         }
 
         obj->setEdgeList(obj->pointList);
-//        qDebug() << obj->pointList.size();
-//        qDebug() << obj->edgeList.size();
         scene->objList.push_back(obj);
     }
+
+    for(int i = 0; i < carList.size(); i++){
+        scene->objList.push_back(carList[0]);
+    }
+
+
 }
 
 
+void EchoServer::updateVehicle(QJsonObject vehicle){
+    QString vehicleType = vehicle["vehicleType"].toString();
+    bool dynamic = vehicle["dynamic"].toBool();
+    int speed = vehicle["speed"].toString().toInt();
+    qDebug() << "speed" << speed;
+    if(vehicleType == "tx"){
+        if(!dynamic){
+            QJsonArray location = vehicle["location1"].toArray();
+            double longitude =  location[0].toDouble();
+            double latitude=  location[1].toDouble();
+            double x = (longitude - xmin)/(factor);
+            double y = (latitude - ymin)/(factor);
+            qDebug() << "x:" << x*30 << "y:" << y*30;
+            receivedTx = new Node(x,y);
+        }else{
+            QJsonArray location1 = vehicle["location1"].toArray();
+            QJsonArray location2 = vehicle["location2"].toArray();
 
+        }
+
+    }else if(vehicleType == "rx"){
+        if(!dynamic){
+            QJsonArray location = vehicle["location1"].toArray();
+            double longitude =  location[0].toDouble();
+            double latitude=  location[1].toDouble();
+            double x = (longitude - xmin)/(factor);
+            double y = (latitude - ymin)/(factor);
+            qDebug() << "x:" << x*30 << "y:" << y*30;
+            receivedRx = new Node(x, y);
+        }else{
+
+        }
+    }else{//障碍车
+        if(vehicleAdded){
+            carList.clear();
+            vehicleAdded = false;
+        }
+        qDebug() << vehicle;
+        Object* obstaclCar = new Object();
+        obstaclCar->type = "vehicle";
+        double z = vehicle["height"].toDouble();
+        QJsonArray bbox = vehicle["bbox"].toArray();
+        for(QJsonValue coor : bbox){
+            QJsonObject point = coor.toObject();
+            double lng = point["x"].toDouble();
+            double lat = point["y"].toDouble();
+            double x = (lng - xmin)/(factor);
+            double y = (lat - ymin)/(factor);
+            obstaclCar->pointList.push_back(new Point(x,y,z));
+        }
+        obstaclCar->setEdgeList(obstaclCar->pointList);
+        carList.push_back(obstaclCar);
+        vehicleAdded = true;
+        qDebug() << carList.size();
+        for(int i = 0; i < carList[0]->pointList.size(); i++){
+            qDebug() << carList[0]->pointList[i]->x * 30;
+            qDebug() << carList[0]->pointList[i]->y * 30;
+            qDebug() << carList[0]->pointList[i]->z;
+        }
+        qDebug() << carList[0]->pointList.size();
+        qDebug() << carList[0]->edgeList.size();
+    }
+
+}
 
 
 

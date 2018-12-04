@@ -53,6 +53,18 @@ public:
 
 
 
+    double distanceOf(double lng1, double lat1, double lng2, double lat2){
+        double radLat1 = qDegreesToRadians(lat1);
+        double radLat2 = qDegreesToRadians(lat2);
+        double a = radLat1 - radLat2;
+        double b = qDegreesToRadians(lng1) - qDegreesToRadians(lng2);
+        double s = 2 * asin(sqrt(pow(sin(a/2),2) + cos(radLat1) * cos(radLat2)
+                                 * pow(sin(b/2),2)));
+        s = s * 6378.137;
+        s = round(s * 100000) / 100000;
+        return s * 1000;
+    }
+
     double getDistance(double L,double B, double L1, double B1 ){
         double a = 6378137.0;//地球长半径
         double f = 0.003352810664747;//地球扁率
@@ -79,7 +91,7 @@ public:
             curr = nodeSet[i];
             if(prev != nullptr){
                 qDebug() << prev->x<< prev->y<< curr->x << curr->y;
-                double curr_distance = getDistance(prev->x, prev->y, curr->x, curr->y);
+                double curr_distance = distanceOf(prev->x, prev->y, curr->x, curr->y);
                 distance = distance + curr_distance;
                 qDebug() << "distace += getdistance" << curr_distance;
                 qDebug() << "distance:" << distance;
