@@ -24,6 +24,8 @@ function sendMessage(msg) {
 
 initWebSocket();
 
+var receivedData;
+
 function initWebSocket() {
     try {
         if (typeof MozWebSocket == 'function')
@@ -39,11 +41,15 @@ function initWebSocket() {
             debug("DISCONNECTED");
         };
         websocket.onmessage = function (evt) {
-            console.log("Message received :", evt.data);
+            // console.log("Message received :", evt.data);
             var data = JSON.parse(evt.data);
+            receivedData = data;
             console.log(data.type);
             if(data.type == "output"){
                 drawPath(data);
+                processResult(data);
+            }else if (data.type == "dynamic"){
+                 processDynamic(data);
             }
         };
         websocket.onerror = function (evt) {

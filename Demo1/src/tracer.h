@@ -17,7 +17,7 @@ public:
     Mesh* mesh;//网格
     Node* p;//节点指针
     int raySpacing = 1;//射线间隔
-    const int maxReflectNum = 3;
+    const int maxReflectNum = 5;
     const int maxdiffractNum = 1;
     int reflectNum = 0;
     int diffractNum = 0;
@@ -171,6 +171,7 @@ public:
                 dy += ay;
             }
             //检测是否遇到接收机
+            double minD = 10000;
             if (mesh->voxelMesh[n].containRx){
 //                qDebug() << "有Rx，但没有捕获" ;
                 double A = source->A;
@@ -187,6 +188,7 @@ public:
                     ret = new Node(x0, y0);
                     ret->type = Rx;
                     verticalPlane(ret);
+//                    minD = d;
                     return;
                 }
             }
@@ -197,7 +199,6 @@ public:
             }
 
             //在每个小格中优先选择距离源点最近的相交节点
-            double minD = 10000;
             //遍历所有边
             for (int i = 0; i < vp.size(); i++){//对此Voxel中的所有edge进行检测
                 Edge* edge = vp[i];
@@ -289,13 +290,13 @@ public:
                 double distanceToEP  = distance(x0,y0, edge->endPoint->x, edge->endPoint->y);
                 if ( diffractNum == 0
                      && distanceToSP < 0.1
-                     && distance(x0, y0, mesh->Rx->x, mesh->Rx->y) < distanceBetweenTxRx)
+                     )
                 {//垂直边缘绕射
                     ret = new Node(edge->startPoint->x, edge->startPoint->y);
                     ret->type = NodeType::diff;
-                }else if(diffractNum == 0
-                         && distanceToEP <0.1
-                         && distance(x0, y0, mesh->Rx->x, mesh->Rx->y) < distanceBetweenTxRx){
+                }else if(diffractNum == 0.1
+                         && distanceToEP <0
+                         ){
                     //垂直边缘绕射
                     ret = new Node(edge->endPoint->x, edge->endPoint->y);
                     ret->type = NodeType::diff;
@@ -343,7 +344,7 @@ public:
             double x = M1 / M;
             double y = M2 / M;
 //                qDebug() << x <<"," << y;
-            return new Point(x, y);
+            return new Node(x, y);
         }else{
             return nullptr;
         }
@@ -399,6 +400,7 @@ public:
     }
     //VPL算法
     void verticalPlane(Node* node){
+        bool losProcessed = false;
         if( (node->type == NodeType::Tx)){
             for(int i = 0; i < 360; i += raySpacing){
                 node->setAngle(i);
@@ -436,45 +438,143 @@ public:
             vector<Node*> tmp;
             for(int i = 0; i < nodeList.size(); i++){
                 //恢复到坐标表示
-                double x = nodeList[i]->x / 30.0 * (mesh->factor) + mesh->bbox[0];
-                double y = nodeList[i]->y / 30.0 * (mesh->factor) + mesh->bbox[1];
-//                qDebug() << "....................";
-//                qDebug() << x;
-//                qDebug() << y;
+                double x = nodeList[i]->x / mesh->size * (mesh->factor) + mesh->bbox[0];
+                double y = nodeList[i]->y / mesh->size * (mesh->factor) + mesh->bbox[1];
                 Node* ans = new Node(x,y,nodeList[i]->z);
                 ans->setAngle(nodeList[i]->angle);
                 ans->type = nodeList[i]->type;
                 tmp.push_back(ans);
             }
             Path* path = new Path(tmp);
-//            path->channelGain(0);
-            //添加一条路径
-            allPath.push_back(path);
+            if(tmp.size() > 2){
+                path->path_type = PathType::NLOSb;
+                allPath.push_back(path);
+            }else{
+                if(!losProcessed){
+                    processLOS();
+                    losProcessed = true;
+                }
+
+            }
             nodeList.pop_back();
         }
 
     }
 
-    void processLos(){
+
+    void processLOS(){
+        qDebug() <<"process Los";
+        vector<Node*> los;
+        los.push_back(new Node(tx));
+        los.push_back(new Node(mesh->Rx));
+        for(int i = 0; i < los.size(); i++){
+            los[i]->x = los[i]->x  / mesh->size * (mesh->factor) + mesh->bbox[0];
+            los[i]->y = los[i]->y / mesh->size * (mesh->factor) + mesh->bbox[1];
+        }
+
+        Path* linePath = new Path(los);
+        linePath->path_type = PathType::LOS;
+        allPath.push_back(linePath);
+
+        vector<Node*> groundReflect;
+        groundReflect.push_back(new Node(tx));
+        Node* ground = new Node((tx->x + mesh->Rx->x)/2,
+                               (tx->y + mesh->Rx->y)/2);
+        ground->type = NodeType::reflect2;
+        groundReflect.push_back(ground);
+        groundReflect.push_back(new Node(mesh->Rx));
+        for(int i = 0; i < groundReflect.size(); i++){
+            groundReflect[i]->x = groundReflect[i]->x  / mesh->size * (mesh->factor) + mesh->bbox[0];
+            groundReflect[i]->y = groundReflect[i]->y / mesh->size * (mesh->factor) + mesh->bbox[1];
+        }
+
+        Path* groundPath = new Path(groundReflect);
+        groundPath->path_type = PathType::LOSg;
+        allPath.push_back(groundPath);
+    }
+
+    void processNLOSv(){
+
+        qDebug() << "process Nlosv";
         vector<Node*> line;
         vector<Node*> left;
         vector<Node*> right;
-        nodeList.push_back(tx);
+        line.push_back(new Node(tx));
+        left.push_back(new Node(tx));
+        right.push_back(new Node(tx));
+
 
         if(vehicles.size() > 0){
+            int n = vehicles.size();
             Object* vehicle = vehicles[0];
             vector<Edge*> edges = vehicle->edgeList;
             for(int i = 0; i < edges.size(); i++){
                 Edge* edge = edges[i];
                 Point* intersetPoint = Intersertion_segment(tx, mesh->Rx, edge->startPoint, edge->endPoint);
                 if(intersetPoint != nullptr){
-                    double D = distance(tx->x, tx->y, intersetPoint->x, intersetPoint->y);
+                    Node* diffroof = new Node(intersetPoint->x, intersetPoint->y,vehicle->z);
+                    Node* diff1 = new Node(edge->startPoint->x, edge->startPoint->y);
+                    Node* diff2 = new Node(edge->endPoint->x, edge->endPoint->y);
+                    if(edge->startPoint->x > intersetPoint->x){
+                        Node* tmp = diff1;
+                        diff1 = diff2;
+                        diff2 = tmp;
+                    }
 
+                    diffroof->type = NodeType::diff2;
+                    diff1->type = NodeType::diff;
+                    diff2->type = NodeType::diff;
+                    line.push_back(diffroof);
+                    right.push_back(diff2);
+                    left.push_back(diff1);
                 }
             }
+
+            line.push_back(new Node(mesh->Rx));
+            left.push_back(new Node(mesh->Rx));
+            right.push_back(new Node(mesh->Rx));
+            if(line.size() == 4){
+                if(distance(tx->x, tx->y, line[1]->x,line[1]->y)
+                        >distance(tx->x, tx->y, line[2]->x,line[2]->y)){
+
+                    Node* tmp = line[1];
+                    line[1] = line[2];
+                    line[2] = tmp;
+
+                    tmp = left[1];
+                    left[1] = left[2];
+                    left[2] = tmp;
+
+
+                    tmp = right[1];
+                    right[1] = right[2];
+                    right[2] = tmp;
+                }
+            }
+
+
+
+            for(int i = 0; i < line.size(); i++){
+
+                line[i]->x = line[i]->x  /mesh->size * (mesh->factor) + mesh->bbox[0];
+                line[i]->y = line[i]->y /mesh->size * (mesh->factor) + mesh->bbox[1];
+                left[i]->x = left[i]->x /mesh->size * (mesh->factor) + mesh->bbox[0];
+                left[i]->y = left[i]->y /mesh->size * (mesh->factor) + mesh->bbox[1];
+                right[i]->x = right[i]->x /mesh->size * (mesh->factor) + mesh->bbox[0];
+                right[i]->y = right[i]->y / mesh->size * (mesh->factor) + mesh->bbox[1];
+            }
+
+
+            Path* linePath = new Path(line);
+            linePath->path_type = PathType::NLOSv;
+            Path* leftPath = new Path(left);
+            leftPath->path_type = PathType::NLOSv;
+            Path* rightPath = new Path(right);
+            rightPath->path_type = PathType::NLOSv;
+            allPath.push_back(linePath);
+            allPath.push_back(leftPath);
+            allPath.push_back(rightPath);
         }
-
-
 
     }
 

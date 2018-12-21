@@ -44,8 +44,74 @@ var layers = {
 
 main();
 render();
-loadPathLoss([1, 2, 3, 4, 5, 6], [-100, -101, -102, -103, -99, -98]);
 
+function processDynamic(data) {
+    var result = data.result;
+    var time = [];
+    var distance = [];
+    var rxPosition = [];
+    var totalGain = [];
+    var paths = [];
+    var effectiveV;
+    var tx_v = [];
+    var rx_v = [];
+    var averageDelay = [];
+    var rms = [];
+    for (var p in result){
+        var output = result[p];
+        time.push(output.time);
+        distance.push(GetDistance(output.tx_x,output.tx_y,output.rx_x, output.rx_y));
+        rxPosition.push([coordinateTransX(output.rx_x),coordinateTransY(output.rx_y)]);
+        totalGain.push(output.totalgain);
+        tx_v.push(output.tx_v);
+        rx_v.push(output.rx_v);
+        paths.push(output.paths);
+        averageDelay.push(output.averageDelay);
+        rms.push(output.rms);
+    }
+    var locations = generateAxis(time,totalGain);
+    console.log(locations);
+    showPathLoss(rxPosition,totalGain);
+    loadPL(locations);
+    processDynamicDelay(time,paths,averageDelay,rms);
+    processDynamicDoppler(time,paths);
+    processTimeSpeed(time,distance,tx_v,rx_v);
+
+}
+
+function showPathLoss(rxPosition,totalGain) {
+    var min = 1;
+    var max = -1000;
+    for (var i = 0; i < totalGain.length; i++){
+        if(totalGain[i] < min){
+            min = totalGain[i];
+        }
+        if(totalGain[i] > max){
+            max = totalGain[i];
+        }
+    }
+    initColorMap(min,max);
+    for(var i = 0; i < rxPosition.length - 1; i++){
+        var positions = [];
+        positions.push(rxPosition[i][1],0.2,rxPosition[i][0]);
+        positions.push(rxPosition[i + 1][1],0.2,rxPosition[i + 1][0]);
+        // console.log(positions);
+        // console.log(totalGain[i]);
+        drawline(positions,lut.getColor( totalGain[i]));
+    }
+
+}
+
+function generateAxis(xAxis,yAxis) {
+    var locations = [];
+    for(var i = 0; i < xAxis.length; i++){
+        var location = [];
+        location.push(xAxis[i]);
+        location.push(yAxis[i]);
+        locations.push(location);
+    }
+    return locations;
+}
 
 function processVehicleForm() {
     var speed = document.getElementById("speed").value;
@@ -67,10 +133,6 @@ function processVehicleForm() {
     console.log(isDynamic);
     setVehicle(speed,type,isDynamic);
 }
-
-
-
-
 
 function setVehicle(speed,type,dynamic){
 
@@ -111,7 +173,7 @@ function setVehicle(speed,type,dynamic){
 
 var vehicleType;
 var dynamicMod;
-var count;
+var count = 0;
 var startPoint;
 var distance;
 var vehicleDTO = {};
@@ -157,7 +219,7 @@ function drawTriangle(intersect) {
     mesh.position.y = 0.1;
     mesh.rotation.set( Math.PI / 2, 0, Math.PI * 5 / 4 );
     mesh.rotateZ(2 * Math.PI - angle);
-    mesh.scale.set( 2, 2, 2 );
+    mesh.scale.set( 1, 1, 1 );
     mesh.name = Math.random().toString(36).substr(2);
     scene.add(mesh);
     triangle.push(mesh);
@@ -199,8 +261,7 @@ function onDocumentMouseMove(event) {
     cxt.fillText(latitude, 10, 33);
 
     if(startPoint != undefined){
-
-        console.log(distance);
+        // console.log(distance);
         var positions = [];
         positions.push(y,0.1,x);
         positions.push(startPoint.y,0.1,startPoint.x);
@@ -229,7 +290,7 @@ function onDocumentMouseDown(event) {
         var longitude = xToCoordinate(x);
         var latitude  = yToCoordinate(y);
 
-        if (dynamicMod == undefined || dynamicMod == false){
+        if (dynamicMod == undefined && dynamicMod == false){
             if (vehicleType == "other"){
                 loadFbx(intersect,vehicleType)
             } else {
@@ -253,7 +314,9 @@ function onDocumentMouseDown(event) {
             }else {
                 distance = GetDistance(longitude, latitude, startPoint.longitude, startPoint.latitude);
                 console.log(distance);
-                drawText(ENfont,distance + "m",(x + startPoint.x) / 2,(y + startPoint.y) / 2, 2);
+                if (dynamicMod == true){
+                    drawText(ENfont,distance + "m",(x + startPoint.x) / 2,(y + startPoint.y) / 2, 2);
+                }
                 drawTriangle(intersect);
                 vehicleDTO.location2 = [longitude,latitude];
                 vehicleDTO.distance = distance;
@@ -294,7 +357,7 @@ function rad(x) {
 }
 
 
-function drawSenario(senario,mod) {
+function drawSenario(senario,mod,sw) {
 
     var pointX = [];
     var pointY = [];
@@ -319,11 +382,14 @@ function drawSenario(senario,mod) {
     builidings = [];
     for (var i = 0; i < pointX.length; i++) {
         addMulGeometry(pointX[i], pointY[i], pointZ[i],mod);
+        // addMulGeometry(pointX[i],pointY[i], 0,mod);
+    }
+    if (sw == undefined){
+        gui.add( layers, 'building' ).onChange( function () {
+            camera.layers.toggle( 1 );
+        } );
     }
 
-    gui.add( layers, 'building' ).onChange( function () {
-        camera.layers.toggle( 1 );
-    } );
 }
 function setTx(type) {
     orbitControls.enabled = false;
@@ -377,9 +443,9 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-
+var namelist = new Set();
 function drawRoad(roads){
-    var roadName = "init";
+
     roadLines = [];
     for (let i = 0; i < roads.length; i++){
         var geometry = new THREE.Geometry();
@@ -415,9 +481,9 @@ function drawRoad(roads){
             scene.add(line);
             roadLines.push(line);
         }
-        if(name != roadName){
-            // drawText(CNfont,name,x,y,direction);
-            // roadName = name;
+        if(!namelist.has(name)){
+            drawText(CNfont,name,x,y,direction);
+            namelist.add(name);
         }
     }
     camera.layers.enable( 2 );
@@ -427,7 +493,7 @@ function drawRoad(roads){
 
 }
 
-function drawText( font , text, x, y , direction) {
+function drawText( font , text, x, y , direction,z) {
 
     // Get text from hash
 
@@ -464,6 +530,9 @@ function drawText( font , text, x, y , direction) {
     mesh.position.y = 0.1;
     mesh.position.z = x;
 
+    if(z != undefined){
+        mesh.position.y = z;
+    }
     mesh.rotation.x = Math.PI / 2;
     mesh.rotation.y = Math.PI ;
 
@@ -483,30 +552,77 @@ function drawText( font , text, x, y , direction) {
 function drawPath(data) {
     initColorMap(-200,-70);
     var paths = data.paths;
+
     for (var p in paths) {
         var path = paths[p];
         var nodeList = path.nodeList;
         var geometry = new THREE.Geometry();
         var material = new THREE.LineBasicMaterial({ vertexColors: true });
-        var color1 = new THREE.Color(0x444444), color2 = new THREE.Color(0xFF0000);
+        // var color1 = new THREE.Color(0x444444), color2 = new THREE.Color(0xFF0000);
+        if (path.pathloss < -180){
+            console.log("continue");
+            continue;
+        }
         var color = lut.getColor( path.pathloss );
-        console.log(color);
         for (let i = 0; i < nodeList.length; i++) {
             nodeList[i].x = coordinateTransX(nodeList[i].x);
             nodeList[i].y = coordinateTransY(nodeList[i].y);
         }
-        for (let i = 0; i < nodeList.length - 1; i++) {
-            var p1 = new THREE.Vector3(nodeList[i].y, 0.3, nodeList[i].x);
-            var p2 = new THREE.Vector3(nodeList[i + 1].y, 0.3, nodeList[i + 1].x);
-            geometry.vertices.push(p1);
-            geometry.vertices.push(p2);
-            geometry.colors.push(color,color);
-            var line = new THREE.Line(geometry, material, THREE.LineSegments);
+        if(path.type == 2 && path.diffractNum == 0){
+            var positions = [];
+            positions.push(nodeList[0].y, 0.3, nodeList[0].x);
+            positions.push(nodeList[1].y, 0.6, nodeList[1].x);
+            positions.push(nodeList[2].y, 0.6, nodeList[2].x);
+            positions.push(nodeList[3].y, 0.3, nodeList[3].x);
+            var geometry = new THREE.LineGeometry();
+            geometry.setPositions( positions );
+            var matLine = new THREE.LineMaterial( {
+                color: color,
+                linewidth: 0.001,
+                // vertexColors: THREE.VertexColors,
+                dashed: false
+            } );
+            line = new THREE.Line2( geometry, matLine );
+            line.computeLineDistances();
+            line.scale.set( 1, 1, 1 );
             line.name = Math.random().toString(36).substr(2);
             scene.add(line);
             line.layers.set(4);
             pathLines.push(line);
+        }else if(path.type == 3){
+            var positions = [];
+            positions.push(nodeList[0].y, 0.3, nodeList[0].x);
+            positions.push(nodeList[1].y, 0, nodeList[1].x);
+            positions.push(nodeList[2].y, 0.3, nodeList[2].x);
+            var geometry = new THREE.LineGeometry();
+            geometry.setPositions( positions );
+            var matLine = new THREE.LineMaterial( {
+                color: color,
+                linewidth: 0.001,
+                dashed: false
+            } );
+            line = new THREE.Line2( geometry, matLine );
+            line.computeLineDistances();
+            line.scale.set( 1, 1, 1 );
+            line.name = Math.random().toString(36).substr(2);
+            scene.add(line);
+            line.layers.set(4);
+            pathLines.push(line);
+        }else{
+            for (let i = 0; i < nodeList.length - 1; i++) {
+                var p1 = new THREE.Vector3(nodeList[i].y, 0.3, nodeList[i].x);
+                var p2 = new THREE.Vector3(nodeList[i + 1].y, 0.3, nodeList[i + 1].x);
+                geometry.vertices.push(p1);
+                geometry.vertices.push(p2);
+                geometry.colors.push(color,color);
+                var line = new THREE.Line(geometry, material, THREE.LineSegments);
+                line.name = Math.random().toString(36).substr(2);
+                scene.add(line);
+                line.layers.set(4);
+                pathLines.push(line);
+            }
         }
+
     }
     camera.layers.enable( 4 );
     gui.add( layers, 'ray' ).onChange( function () {
@@ -590,6 +706,12 @@ function loadFbx(intersect, type){
 
 function load3DS(intersect, type) {
     var loader = new THREE.TDSLoader();
+    if (type == "tx"){
+        drawText(ENfont,'Tx',intersect.point.z,intersect.point.x,1,0.5);
+    } else {
+        drawText(ENfont,'Rx',intersect.point.z,intersect.point.x,1,0.5);
+    }
+
     loader.load("./Evo.3ds", function (object) {
         object.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
@@ -597,7 +719,7 @@ function load3DS(intersect, type) {
                 //child.material.normalMap = normal;
             }
         });
-        object.scale.set(0.001, 0.001, 0.001);
+        object.scale.set(0.0012, 0.0012, 0.0012);
         object.position.copy(intersect.point);
         object.rotateX(Math.PI * 6 / 4);
         object.rotateZ(camera.rotation._z);
@@ -645,7 +767,7 @@ function initColorMap(min, max){
     lut.setMax( max );
     lut.setMin( min );
     var legend = lut.setLegendOn( { 'position': { 'x': -0.3, 'y': -0.1, 'z': -5 }} );
-    var labels = lut.setLegendLabels( { 'title': 'PathLoss', 'um': 'dB', 'ticks': 5 } );
+    var labels = lut.setLegendLabels( { 'title': 'ChannelGain', 'um': 'dB', 'ticks': 5 } );
     // renderer2.setClearColor(new THREE.Color(0xffffff)); //设置窗口背景颜色为黑
     renderer2.setClearAlpha(0);
     renderer2.setSize(width, height); //设置窗口尺寸
@@ -713,12 +835,24 @@ function main() {
 
     plane();
 
-    // var gridHelper = new THREE.GridHelper( 80, 30 );
+    // var gridHelper = new THREE.GridHelper( 80, 20 );
     // scene.add( gridHelper );
     window.addEventListener('resize', onWindowResize, false);
     // dragControlInit();
     //  var gridHelper = new THREE.GridHelper( 50, 100 );
     //  scene.add( gridHelper );
+}
+
+mod = "3d";
+function switchMod(){
+    remove(builidings);
+    if (mod == "3d"){
+        drawSenario(senario,"2d",true);
+        mod = "2d";
+    } else {
+        drawSenario(senario,"3d",true);
+        mod = "3d";
+    }
 }
 
 function plane() {
@@ -795,6 +929,15 @@ function addMulGeometry(arrZ, arrX, height, mod) {
     var depth = 0;
     if (mod == "3d"){
         depth = height;
+        var material = new THREE.MeshLambertMaterial({ //创建材料
+            color: "#7e7d80",
+            wireframe: false
+        });
+    }else {
+        var material = new THREE.MeshLambertMaterial({ //创建材料
+            color: "#262528",
+            wireframe: false
+        });
     }
     var extrudeSettings = { depth: depth, bevelEnabled: false};
     var cityShape = new THREE.Shape(city);
@@ -808,13 +951,11 @@ function addMulGeometry(arrZ, arrX, height, mod) {
 
 
     var geometry = new THREE.ExtrudeBufferGeometry( cityShape, extrudeSettings );
-    var material = new THREE.MeshLambertMaterial({ //创建材料
-        color: "#7e7d80",
-        wireframe: false
-    });
+
     var mesh = new THREE.Mesh( geometry,  material);
     mesh.rotation.x = -Math.PI / 2;
     mesh.rotation.z = -Math.PI / 2;
+    mesh.position.y = 0.12;
     mesh.name = "bd" + Math.random().toString(36).substr(2);
     builidings.push(mesh);
 
@@ -840,14 +981,23 @@ function render() {
     renderer.render(scene, camera);
 }
 
+
+
+
 //画线段
-function drawline(positions) {
+function drawline(positions,color) {
     var geometry = new THREE.LineGeometry();
     geometry.setPositions( positions );
     // geometry.setColors( colors );
+    var c;
+    if(color != undefined){
+        c = color;
+    }else {
+        c = "#aa9c1c"
+    }
     var matLine = new THREE.LineMaterial( {
-        color: "#aa8f13",
-        linewidth: 0.002,
+        color: c,
+        linewidth: 0.005,
         // vertexColors: THREE.VertexColors,
         dashed: false
     } );
@@ -858,13 +1008,13 @@ function drawline(positions) {
 }
 
 
-var positions = [];
-positions.push(-40,0.5,-40);
-positions.push(40,0.5,-40);
-positions.push(40,0.5,40);
-positions.push(-40,0.5,40);
-positions.push(-40,0.5,-40);
-drawline(positions);
+// var positions = [];
+// positions.push(-40,0.5,-40);
+// positions.push(40,0.5,-40);
+// positions.push(40,0.5,40);
+// positions.push(-40,0.5,40);
+// positions.push(-40,0.5,-40);
+// drawline(positions);
 
 
 

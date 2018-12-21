@@ -4,6 +4,6 @@ enum NodeType {
     Tx, Rx, reflect, diff, newSouece1,newSouece2,reflect2,diff2,none
 };
 enum PathType{
-    INCIDENT, REFLECT, REFLECT_REFLECT, DIFFRECT, DIFFRECT_DEFFRECT, REFLECT_DEFFRECT, DIFFRECT_REFLECT
+    LOS, NLOSb, NLOSv,LOSg
 };
 #endif // TYPE_H

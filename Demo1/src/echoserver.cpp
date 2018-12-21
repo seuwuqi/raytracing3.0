@@ -63,8 +63,19 @@ void EchoServer::processTextMessage(QString message)
         }else if(message == "2"){
 //          射线追踪
 //            QString data = rayTracing();
-            QString data = VPL();
-            pClient->sendTextMessage(data);
+
+            if(rxData->dynamic){
+                QJsonObject json = DynamicVPL();
+                QJsonDocument doc(json);
+                QString strJson(doc.toJson(QJsonDocument::Compact));
+                pClient->sendTextMessage(strJson);
+            }else{
+                QJsonObject json = VPL(false,0);
+                QJsonDocument doc(json);
+                QString strJson(doc.toJson(QJsonDocument::Compact));
+                pClient->sendTextMessage(strJson);
+            }
+
         }else if(message == '3'){
 //          更新道路
 //            updateRoad();
@@ -117,16 +128,127 @@ void EchoServer::socketDisconnected()
 }
 //! [socketDisconnected]
 
-QString EchoServer::VPL(){
+QJsonObject EchoServer::DynamicVPL(){
+//    updateScene(sceneDate);
+    double a1 = 3.6;
+    double a2 = 5;
+
+    double Txstartx = txData->x;
+    double Txstarty = txData->y;
+
+    double Txendx = txData->x2;
+    double Txendy = txData->y2;
+
+
+    double Rxstartx = rxData->x;
+    double Rxstarty = rxData->y;
+
+    double Rxendx = rxData->x2;
+    double Rxendy = rxData->y2;
+
+
+    double Txspeed = txData->speed/3.6;
+    double Rxspeed = rxData->speed/3.6;
+
+
+    double Txdistance = txData->distance;
+    double Rxdistance = rxData->distance;
+
+    double Txt1 = Txspeed / a1;
+    double Txt3 = Txspeed / a2;
+
+    double Rxt1 = Rxspeed / a1;
+    double Rxt3 = Rxspeed / a2;
+
+    double Txt2 = (Txdistance - 0.5*a1*Txt1*Txt1 - 0.5*a2*Txt2*Txt2)/Txspeed;
+    double Rxt2 = (Rxdistance - 0.5*a1*Rxt1*Rxt1 - 0.5*a2*Rxt2*Rxt2)/Rxspeed;
+
+    double Txtotal = Txt1 + Txt2 + Txt3;
+    double Rxtotal = Rxt1 + Rxt2 + Rxt3;
+
+    double T = Txtotal > Rxtotal ? Txtotal : Rxtotal;
+
+    if(T > 30){
+        T = 30;
+    }
+    double txmoved;
+    double rxmoved;
+    double txV;
+    double rxV;
+    QJsonArray result;
+    for(double t = 0; t <= T; t++){
+        if(t < Txt1){
+             txmoved = 0.5*a1*t*t;
+             txV = a1*t;
+        }else if(t < Txt1 + Txt2){
+             txmoved = 0.5*a1*Txt1*Txt1 + Txspeed * (t - Txt1);
+             txV = Txspeed;
+        }else if(t < Txtotal){
+             txmoved = Txdistance - 0.5*a2*(Txtotal - t)*(Txtotal - t);
+             txV = Txspeed - a2*(t - Txt1 - Txt2);
+        }else{
+            txmoved = Txdistance;
+            txV = 0;
+        }
+
+        if(t < Rxt1){
+            rxmoved = 0.5*a1*t*t;
+            rxV = a1*t;
+        }else if(t < Rxt1 + Rxt2){
+            rxmoved = 0.5*a1*Rxt1*Rxt1 + Rxspeed * (t - Txt1);
+            rxV = Rxspeed;
+        }else if(t < Rxtotal){
+            rxmoved = Rxdistance - 0.5*a2*(Rxtotal - t)*(Rxtotal - t);
+            rxV = Rxspeed - a2*(t - Rxt1 - Rxt2);
+        }else{
+            rxmoved = Rxdistance;
+            rxV = 0;
+        }
+
+        qDebug() << "txmoved:" << txmoved;
+        qDebug() << "rxmoved:" << rxmoved;
+        qDebug() << "txv:" << txV;
+        qDebug() << "rxv:" << rxV;
+
+        txData->speed = txV;
+        txData->x = Txstartx + (Txendx - Txstartx) * txmoved / Txdistance;
+        txData->y = Txstarty + (Txendy - Txstarty) * txmoved / Txdistance;
+        rxData->speed = rxV;
+        rxData->x = Rxstartx + (Rxendx - Rxstartx) * rxmoved / Rxdistance;
+        rxData->y = Rxstarty + (Rxendy - Rxstarty) * rxmoved / Rxdistance;
+
+        qDebug() <<"tx_x" << txData->x *30;
+        qDebug() <<"tx_y" << txData->y *30;
+        qDebug() <<"rx_x" << rxData->x *30;
+        qDebug() <<"rx_y" << rxData->y *30;
+        QJsonObject paths = VPL(true,t);
+
+        result.append(paths);
+    }
+
+    QJsonObject dynamic;
+    dynamic.insert("type", "dynamic");
+    dynamic.insert("result", result);
+    return dynamic;
+}
+
+
+QJsonObject EchoServer::VPL(bool isDynamic,double time){
+//    if(!isDynamic){
+//         updateScene(sceneDate);
+//    }
     updateScene(sceneDate);
     qDebug() << "scene size : "<<scene->objList.size();
-    Node* rx = new Node(receivedRx->x, receivedRx->y, 0.0, true);
-    Mesh* mesh = new Mesh(30, scene, rx);
-    Node* source = new Node(receivedTx->x * mesh->size, receivedTx->y * mesh->size, 0);
+    Node* rx = new Node(rxData->x, rxData->y, 0.0, true);
+    Mesh* mesh = new Mesh(40, scene, rx);
+    Node* source = new Node(txData->x * mesh->size, txData->y * mesh->size, 0);
     source->type = NodeType::Tx;
 //    射线追踪器
     Tracer*  tracer = new Tracer(mesh,source,carList);
+//    tracer->verticalPlane(source);
     tracer->verticalPlane(source);
+    tracer->processNLOSv();
+//    tracer->processLOS();
     if(vehicleAdded){
         carList.pop_back();
         vehicleAdded = false;
@@ -136,26 +258,56 @@ QString EchoServer::VPL(){
     QJsonObject json;
     json.insert("type", QString("output"));
     QJsonArray paths;
+    double totalgain = 0;
+    double N1 = 0;
+    double N2 = 0;
+    double M = 0;
     for(int i = 0; i < tracer->allPath.size(); i++){
         QJsonObject path;
         Path* p = tracer->allPath[i];
-        path.insert("pathloss",p->channelGain(0));
-        QJsonArray nodeList;
-        for(int j = 0; j < p->nodeSet.size() ; j++){
-            Node* node = p->nodeSet[j];
-            QJsonObject point;
-            point.insert("x",node->x);
-            point.insert("y",node->y);
-            point.insert("z",node->z);
-            nodeList.insert(j,point);
+        double gain = p->channelGain(0);
+        totalgain += gain;
+        M += gain * gain;
+        path.insert("pathloss",  20 * log10(gain));
+        double delay = p->timeDelay();
+        path.insert("timeDelay",delay);
+        N1 += gain * gain * delay;
+        N2 += gain * gain * delay * delay;
+        path.insert("type",p->path_type);
+        path.insert("reflectNum",p->getReflectCount());
+        path.insert("diffractNum",p->getDiffractCount());
+        path.insert("dopplerShift",p->getDopplerShift());
+        path.insert("DOA", p->getDOA());
+        path.insert("AOA", p->getAOA());
+        if(!isDynamic){
+            QJsonArray nodeList;
+            for(int j = 0; j < p->nodeSet.size() ; j++){
+                Node* node = p->nodeSet[j];
+                QJsonObject point;
+                point.insert("x",node->x);
+                point.insert("y",node->y);
+                point.insert("z",node->z);
+                nodeList.insert(j,point);
+            }
+            path.insert("nodeList",nodeList);
         }
-        path.insert("nodeList",nodeList);
         paths.insert(i,path);
     }
+    json.insert("averageDelay",N1 / M);
+    json.insert("rms", sqrt(N2/M - pow(N1/M,2)));
+    json.insert("totalgain", 20 * log10(totalgain));
     json.insert("paths",paths);
-    QJsonDocument doc(json);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-    return strJson;
+    json.insert("time",time);
+
+//    double x = nodeList[i]->x / mesh->size * (mesh->factor) + mesh->bbox[0];
+//    double y = nodeList[i]->y / mesh->size * (mesh->factor) + mesh->bbox[1];
+    json.insert("tx_x",txData->x *factor + xmin);
+    json.insert("tx_y",txData->y * factor + ymin);
+    json.insert("rx_x",rxData->x * factor + xmin);
+    json.insert("rx_y",rxData->y * factor + ymin);
+    json.insert("tx_v",txData->speed);
+    json.insert("rx_v",rxData->speed);
+    return json;
 }
 
 void EchoServer::updateScene(QJsonObject jsonObject){
@@ -191,8 +343,6 @@ void EchoServer::updateScene(QJsonObject jsonObject){
     for(int i = 0; i < carList.size(); i++){
         scene->objList.push_back(carList[0]);
     }
-
-
 }
 
 
@@ -200,34 +350,38 @@ void EchoServer::updateVehicle(QJsonObject vehicle){
     QString vehicleType = vehicle["vehicleType"].toString();
     bool dynamic = vehicle["dynamic"].toBool();
     int speed = vehicle["speed"].toString().toInt();
+    QJsonArray location1 = vehicle["location1"].toArray();
+    QJsonArray location2 = vehicle["location2"].toArray();
+    double distance = vehicle["distance"].toDouble();
+    double longitude =  location1[0].toDouble();
+    double latitude=  location1[1].toDouble();
+    double x1 = (longitude - xmin)/(factor);
+    double y1 = (latitude - ymin)/(factor);
+    double lng2 = location2[0].toDouble();
+    double lat2 = location2[1].toDouble();
+    double x2 = (lng2 - xmin)/(factor);
+    double y2 = (lat2 - ymin)/(factor);
     qDebug() << "speed" << speed;
     if(vehicleType == "tx"){
-        if(!dynamic){
-            QJsonArray location = vehicle["location1"].toArray();
-            double longitude =  location[0].toDouble();
-            double latitude=  location[1].toDouble();
-            double x = (longitude - xmin)/(factor);
-            double y = (latitude - ymin)/(factor);
-            qDebug() << "x:" << x*30 << "y:" << y*30;
-            receivedTx = new Node(x,y);
-        }else{
-            QJsonArray location1 = vehicle["location1"].toArray();
-            QJsonArray location2 = vehicle["location2"].toArray();
-
-        }
-
+        txData = new Vehicle();
+        txData->x = x1;
+        txData->y = y1;
+        txData->x2 = x2;
+        txData->y2= y2;
+        txData->speed = speed;
+        txData->dynamic = dynamic;
+        txData->type = vehicleType;
+        txData->distance = distance;
     }else if(vehicleType == "rx"){
-        if(!dynamic){
-            QJsonArray location = vehicle["location1"].toArray();
-            double longitude =  location[0].toDouble();
-            double latitude=  location[1].toDouble();
-            double x = (longitude - xmin)/(factor);
-            double y = (latitude - ymin)/(factor);
-            qDebug() << "x:" << x*30 << "y:" << y*30;
-            receivedRx = new Node(x, y);
-        }else{
-
-        }
+        rxData = new Vehicle();
+        rxData->x = x1;
+        rxData->y = y1;
+        rxData->x2 = x2;
+        rxData->y2= y2;
+        rxData->speed = speed;
+        rxData->dynamic = dynamic;
+        rxData->type = vehicleType;
+        rxData->distance = distance;
     }else{//障碍车
         if(vehicleAdded){
             carList.clear();
@@ -258,7 +412,6 @@ void EchoServer::updateVehicle(QJsonObject vehicle){
         qDebug() << carList[0]->pointList.size();
         qDebug() << carList[0]->edgeList.size();
     }
-
 }
 
 

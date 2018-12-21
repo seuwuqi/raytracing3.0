@@ -1,30 +1,29 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 #include"point.h"
-class vehicle
+#include"node.h"
+#include"QString"
+class Vehicle:public Node
 {
 public:
-    double width = 0.1;
-    double length = 0.2;
-    double hight = 0.1;
-    double velocity = 10;
-    Point position;
-    vehicle(){
+    double width;
+    double length;
+    double hight;
+    double speed;
+    double x2;
+    double y2;
+    double lng;
+    double lat;
+    QString type;
+    bool dynamic;
+    double distance;
+    Vehicle(){
 
     }
-    vehicle(Point p){
-        position = p;
-    }
-    vehicle(double width,double length,double hight,double velocity)
-    {
-        this->width = width;
-        this->length = length;
-        this->hight = hight;
-        this->velocity = velocity;
-    }
 
-    ~vehicle()
+    ~Vehicle()
     {
+
     }
 };
 

@@ -14,8 +14,12 @@
 #include <QVariant>
 #include "path.h"
 #include <QJsonObject>
+#include "vehicle.h"
+#include "global.h"
+#include "QJsonArray"
 QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
+
 
 class EchoServer : public QObject
 {
@@ -41,13 +45,12 @@ private Q_SLOTS:
 //    void updateRoad();
     void updateScene(QJsonObject jsonObject);
     void updateVehicle(QJsonObject jsonObject);
-    QString VPL();
+    QJsonObject VPL(bool isDynamic,double time);
+    QJsonObject DynamicVPL();
 private:
     QWebSocketServer *m_pWebSocketServer;
     QList<QWebSocket *> m_clients;
     bool m_debug;
-    Node* receivedTx;
-    Node* receivedRx;
     vector<Object*> carList;
     bool vehicleAdded = false;
 };

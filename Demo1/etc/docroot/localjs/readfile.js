@@ -108,6 +108,7 @@ function parseRoadFile() {
                     ymin = source.bbox[1];
                     xmax = source.bbox[2];
                     ymax = source.bbox[3];
+                    dividend = (xmax - xmin) > (ymax - ymin) ? (xmax - xmin) : (ymax - ymin);
                 }
             }).then(function () {
                 drawRoad(roads);
@@ -115,6 +116,7 @@ function parseRoadFile() {
         .catch(error => console.error(error.stack));
 }
 function parseFile() {
+    console.log("ddddddd")
     remove(builidings);
     var shp = "./file/BUILDING_nanjing.shp";
     var dbf = "./file/BUILDING_nanjing.dbf";
@@ -138,12 +140,11 @@ function parseFile() {
                     features : features,
                     bbox : source.bbox
                 }
-                // if (xmin == undefined){
                 xmin = source.bbox[0];
                 ymin = source.bbox[1];
                 xmax = source.bbox[2];
                 ymax = source.bbox[3];
-                // }
+                dividend = (xmax - xmin) > (ymax - ymin) ? (xmax - xmin) : (ymax - ymin);
 
             }).then(function () {
                 drawSenario(senario,"3d");
@@ -159,7 +160,7 @@ function parseDefaultfile(name){
     var building = "./" + name + "/BUILDING_nanjing.shp";
     var road = "./" + name + "/R.shp";
     var roaddbf = "./" + name + "/R.dbf";
-    console.log(building);
+    // console.log(building);
     if(gui.domElement.children[1].childElementCount > 1){
         var nav = document.getElementById("gui");
         nav.removeChild(nav.firstElementChild);
@@ -170,6 +171,7 @@ function parseDefaultfile(name){
         gui.add( layers, 'plane' ).onChange( function () {
             camera.layers.toggle( 0 );
         } );
+
         senario = {};
         features = [];
         roads = [];
@@ -245,6 +247,8 @@ function parseDefaultfile(name){
 var loader = new THREE.FontLoader();
 var CNfont;
 var ENfont;
+
+
 
 function initFont() {
     loader.load( 'fonts/FZLanTingHeiS-UL-GB_Regular.json', function ( font ) {

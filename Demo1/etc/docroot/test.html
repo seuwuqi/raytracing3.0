@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script src="https://unpkg.com/shapefile@0.6"></script>
+<script>
+
+
+    var scene = [];
+    shapefile.open("./BUILDING_nanjing.shp")
+        .then(source => source.read()
+            .then(function log(result) {
+                if (result.done) return;
+                scene.push(result.value);
+                return source.read().then(log);
+            }))
+        .catch(error => console.error(error.stack));
+
+</script>
+</body>
+</html>

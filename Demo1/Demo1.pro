@@ -25,7 +25,8 @@ HEADERS += \
     src/type.h \
     src/vehicle.h \
     src/voxel.h \
-    src/tools.h
+    src/tools.h \
+    src/global.h
 
 SOURCES += src/main.cpp \
            src/requestmapper.cpp \
@@ -35,7 +36,8 @@ SOURCES += src/main.cpp \
            src/controller/fileuploadcontroller.cpp \
            src/controller/sessioncontroller.cpp \
     src/echoserver.cpp \
-    src/FilePoint.cpp
+    src/FilePoint.cpp \
+    src/global.cpp
 
 OTHER_FILES += etc/* etc/docroot/* etc/templates/* etc/ssl/* logs/* ../readme.txt
 

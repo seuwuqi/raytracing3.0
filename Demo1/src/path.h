@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <math.h>
 #include <QtMath>
+#include "global.h"
 using namespace std;
 //路径类，用于表示路劲，计算路劲损失和延时扩展
 class Path
@@ -19,6 +20,12 @@ public:
     double pathLoss;//路径损失
     double delay;//延时
     PathType path_type;
+private:
+    const double permittivity = 5.1;
+    const double C = 300000000;
+    const double TxHeight = 2.2;
+    const double RxHeight = 2.2;
+
 public:
 
     Path(vector<Node*> nodes){
@@ -34,15 +41,37 @@ public:
     }
 
 
+    int getReflectCount(){
+        int count = 0;
+        for(int i = 0; i < nodeSet.size(); i++){
+            if(nodeSet[i]->type ==NodeType::reflect){
+                count++;
+            }
+        }
+        return count;
+    }
+
+
+    int getDiffractCount(){
+        int count = 0;
+        for(int i = 0; i < nodeSet.size(); i++){
+            if(nodeSet[i]->type ==NodeType::diff){
+                count++;
+            }
+        }
+        return count;
+    }
 
     double freeSpace(double lambada, double d){
 
-        return  20*log10(lambada/ (4*M_PI*d));
+        return  (lambada/ (4*M_PI*d));
+
     }
 
-    double reflect(double theta, double epsilon){
-        return sin(theta) - sqrt(epsilon - pow(cos(theta),2)/epsilon)
-                /sin(theta) + sqrt(epsilon - pow(cos(theta),2)/epsilon);
+    double R(double theta,double epsilon){
+
+        return (sin(theta) - sqrt(epsilon - pow(cos(theta),2)))
+                / (sin(theta) + sqrt(epsilon - pow(cos(theta),2)));
     }
 
     double diffract(double phi1, double phi2, double k){
@@ -82,37 +111,137 @@ public:
         return sqrt( pow((x - x1),2)+pow((y - y1),2));
     }
 
+
+    double Electric(){
+        double gain = channelGain(0);
+
+
+    }
+
+    double getAOA(){
+        return nodeSet[nodeSet.size() - 2]->angle;
+    }
+
+    double getDOA(){
+        return nodeSet.front()->angle;
+    }
+
+
+    void unitfy(double* a,double speed){
+        double M = sqrt(pow(a[0],2)+ pow(a[1],2));
+        a[0] = a[0] / M * speed;
+        a[1] = a[1] / M * speed;
+    }
+    double getDopplerShift(){
+        double AOA = getAOA();
+//        qDebug() << "speed "<<txData->speed;
+//        qDebug() << "speed2 "<<rxData->speed;
+
+//        qDebug() << "txData" << txData->x2<< ","<<txData->x<<","<<txData->y2<< "," <<txData->y;
+//        qDebug() << "rxData" << rxData->x2<< ","<<rxData->x<<","<<rxData->y2<< "," <<rxData->y;
+
+        double TxDirection[2]{txData->x2 - txData->x,txData->y2 - txData->y};
+        unitfy(TxDirection,txData->speed);
+        double RxDirection[2]{rxData->x2 - rxData->x,rxData->y2 - rxData->y};
+        unitfy(RxDirection,rxData->speed);
+        double relativeSpeed[2] = {TxDirection[0] -RxDirection[0],
+                                      TxDirection[1] -RxDirection[1]};
+//        qDebug()<<TxDirection[0] <<","<< TxDirection[1];
+//        qDebug()<<RxDirection[0] <<","<< RxDirection[1];
+        double v = sqrt(pow(relativeSpeed[0],2)+(pow(relativeSpeed[1],2)));
+//        qDebug() << "max v:" << v;
+        if(path_type == PathType::NLOSb){
+            v *= fabs(sin(qDegreesToRadians(AOA)));
+        }
+//        qDebug() << "v:" << v;
+        return v /3.6 * 58.9/ 3;
+
+    }
+    double timeDelay(){
+        double distance = 0;
+        Node* prev = nullptr;
+        Node* curr = nullptr;
+        for(int i = 0; i < nodeSet.size(); i++){
+            curr = nodeSet[i];
+            if(prev != nullptr){
+                double curr_distance = distanceOf(prev->x, prev->y, curr->x, curr->y);
+                distance = distance + curr_distance;
+            }
+            prev = curr;
+        }
+//         qDebug() << "total distance:" << distance;
+        double timeDelay = distance/(C/1000000);
+//        qDebug() <<"timeDelay" << timeDelay;
+        return timeDelay;
+    }
+
     double channelGain(int startNode){
-        double gain = 0;
+        if(path_type == PathType::LOSg){
+
+        }else if(path_type == PathType::NLOSv){
+            Node* tx = nodeSet[0];
+            Node* d1 = nodeSet[1];
+            Node* d2 = nodeSet[2];
+            Node* rx = nodeSet[3];
+            double distance1 = distanceOf(tx->x,tx->y,d1->x,d1->y);
+            double distance2 = distanceOf(d1->x,d1->y,d2->x,d2->y);
+            double distance3 = distanceOf(d2->x,d2->y,rx->x,rx->y);
+            double freeSpaceLoss= freeSpace(3.0/58.9, distance1 + distance2 + distance3);
+            double alpha;
+            if(d1->type == NodeType::diff2){
+                 alpha = 2*atan(10/(distance1 + 5));
+            }else{
+                 alpha = 2*atan(15/(distance1 + 5));
+            }
+            alpha = qDegreesToRadians(alpha);
+            qDebug() << "alpha" << alpha;
+            double v = alpha * sqrt( (2 * distance1 * distance3) / (0.051* (distance1 + distance2) ));
+            qDebug() << "v" << v;
+            double gain = 0.5 * exp(-0.95 * v);
+            qDebug() << "gain" << gain;
+            gain *= freeSpaceLoss;
+            return gain;
+        }
+        double gain = 1;
         double distance = 0;
         Node* prev = nullptr;
         Node* curr = nullptr;
         for(int i = startNode; i < nodeSet.size(); i++){
             curr = nodeSet[i];
             if(prev != nullptr){
-                qDebug() << prev->x<< prev->y<< curr->x << curr->y;
+//                qDebug() << prev->x<< prev->y<< curr->x << curr->y;
                 double curr_distance = distanceOf(prev->x, prev->y, curr->x, curr->y);
                 distance = distance + curr_distance;
-                qDebug() << "distace += getdistance" << curr_distance;
-                qDebug() << "distance:" << distance;
+//                qDebug() << "distace += getdistance" << curr_distance;
+//                qDebug() << "distance:" << distance;
                 if(curr->type == NodeType::reflect){
-                    qDebug() << "reflect";
-//                    gain *= reflect();
+//                    qDebug() << "reflect";
+//                    qDebug() << prev->angle;
+//                    qDebug() << curr->angle;
+                    double tmp = fabs( (curr->angle - prev->angle + 360));
+                    while(tmp > 90){
+                        tmp -= 90;
+                    }
+                    double angle = qDegreesToRadians( tmp );
+//                    qDebug() << angle ;
+                    gain *= R(angle,permittivity);
+//                    qDebug() <<  R(angle,permittivity);
                 }else if(curr->type == NodeType::diff){
-                    qDebug() << "diff";
-                    gain += channelGain(i);
+//                    qDebug() << "diff";
+                    double diffLos = channelGain(i);
+//                    qDebug() << "diffLos:" << diffLos;
+                    gain *= diffLos;
                     break;
                 }
-
             }
             prev = curr;
         }
-        qDebug() << "seg distance:" << distance;
-
-        double segGain= freeSpace(3.0/58.9, distance);
-        qDebug() << "segGain" << segGain;
-        gain += segGain;
-        return gain;
+//        qDebug() << "distance:" << distance;
+        double freeSpaceLoss= freeSpace(3.0/58.9, distance);
+//        qDebug() << "freeSpaceLoss" << freeSpaceLoss;
+        gain *= freeSpaceLoss;
+//        qDebug() << "gain" << gain;
+        return fabs(gain);
     }
     //凸包检测
     vector<Node*> convexhull(Node* p1, Node* p2){

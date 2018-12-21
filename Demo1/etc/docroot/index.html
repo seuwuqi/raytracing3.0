@@ -59,10 +59,36 @@
                     <div class="dropdown-divider"></div>
                 </div>
             </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                   aria-expanded="false">输出结果</a>
+                <div class="dropdown-menu">
+                    <a class="btn btn-light" data-toggle="collapse" href="#PL" role="button" aria-expanded="false"
+                       aria-controls="collapseExample01">
+                        路径损失vs时间
+                    </a>
+                    <a class="btn btn-light" data-toggle="collapse" href="#PDP" role="button" aria-expanded="false"
+                       aria-controls="collapseExample01">
+                        时延vs功率
+                    </a>
+                    <a class="btn btn-light" data-toggle="collapse" href="#DP" role="button" aria-expanded="false"
+                       aria-controls="collapseExample01">
+                        多普勒频移vs功率
+                    </a>
+                    <a class="btn btn-light" data-toggle="collapse" href="#SP" role="button" aria-expanded="false"
+                       aria-controls="collapseExample01">
+                        距离vs时间
+                    </a>
+                    <div class="dropdown-divider"></div>
+                </div>
+            </li>
             <li class="nav-item">
                 <a class="btn btn-light" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
                     aria-controls="collapseExample">
                     图层信息
+                </a>
+                <a class="btn btn-light"  href="javascript:;"  onclick="switchMod()" role="button" >
+                    2D/3D
                 </a>
                 <a class="btn btn-light" data-toggle="collapse" href="#collapseExample01" role="button" aria-expanded="false"
                     aria-controls="collapseExample01">
@@ -124,18 +150,58 @@
                     </div>
                 </div>
             </div>
-            <div class="collapse position-absolute" id="collapseExample01"  style="bottom:0px;left: 0px;z-index: 5" >
+            <!--<div class="collapse position-absolute" id="collapseExample01"  style="bottom:0px;left: 0px;z-index: 5" >-->
+                <!--<div class="card card-body">-->
+                    <!--&lt;!&ndash;数据展示部分 container&ndash;&gt;-->
+                    <!--<div class="container">-->
+                        <!--<div class="card card-success">-->
+                            <!--<div class="btn-group btn-group-sm">-->
+                                <!--<button id="pathloss" type="button" class="btn btn-primary">路径损耗</button>-->
+                                <!--<button id="powerdelay" type="button" class="btn btn-secondary">功率时延分布</button>-->
+                                <!--<button id="meandelay" type="button" class="btn btn-success">平均附加时延</button>-->
+                                <!--<button id="dimpowerdelay" type="button" class="btn btn-danger">功率时延空间分布</button>-->
+                            <!--</div>-->
+                            <!--<div id="main" style="width:800px;height:400px"></div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+            <div class="collapse position-absolute" id="PL"  style="bottom:0px;left: 250px;z-index: 5" >
                 <div class="card card-body">
                     <!--数据展示部分 container-->
                     <div class="container">
                         <div class="card card-success">
-                            <div class="btn-group btn-group-sm">
-                                <button id="pathloss" type="button" class="btn btn-primary">路径损耗</button>
-                                <button id="powerdelay" type="button" class="btn btn-secondary">功率时延分布</button>
-                                <button id="meandelay" type="button" class="btn btn-success">平均附加时延</button>
-                                <button id="dimpowerdelay" type="button" class="btn btn-danger">功率时延空间分布</button>
-                            </div>
-                            <div id="main" style="width:800px;height:400px"></div>
+                            <div id="pathloss" style="width:800px;height:400px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="collapse position-absolute" id="PDP"  style="bottom:0px;left: 250px;z-index: 5" >
+                <div class="card card-body">
+                    <!--数据展示部分 container-->
+                    <div class="container">
+                        <div class="card card-success" >
+                            <div id="powerDelay" style="width:800px;height:400px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="collapse position-absolute" id="DP"  style="bottom:0px;left: 250px;z-index: 5" >
+                <div class="card card-body">
+                    <!--数据展示部分 container-->
+                    <div class="container">
+                        <div class="card card-success">
+                            <div id="doppler" style="width:800px;height:400px"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="collapse position-absolute" id="SP"  style="bottom:0px;left: 250px;z-index: 5" >
+                <div class="card card-body">
+                    <!--数据展示部分 container-->
+                    <div class="container">
+                        <div class="card card-success">
+                            <div id="speedDistance" style="width:800px;height:400px"></div>
                         </div>
                     </div>
                 </div>
@@ -372,7 +438,7 @@
     <script src="localjs/webgl.js"></script>
 
     <!--read-file-->
-    <script src="https://unpkg.com/shapefile@0.6"></script>
+    <script src="js/shapefile.js"></script>
     <script src="localjs/readfile.js"></script>
 
 

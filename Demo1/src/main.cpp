@@ -124,10 +124,10 @@ int main(int argc, char *argv[])
 
 
 
-    QtWebEngine::initialize();
+//    QtWebEngine::initialize();
 
-    QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("../Demo1/main.qml")));
+//    QQmlApplicationEngine engine;
+//    engine.load(QUrl(QStringLiteral("../Demo1/main.qml")));
 
     EchoServer *server = new EchoServer(1234, true);
 

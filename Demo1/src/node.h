@@ -48,6 +48,15 @@ public:
         range[0] = range[1] = vSpread[0] = vSpread[1] = 0.0;
     }
 
+
+    Node(Node* node){
+        this->x = node->x;
+        this->y = node->y;
+        this->z = node->z;
+        this->type = node->type;
+        setAngle(node->angle);
+    }
+
     ~Node()
     {
     }
